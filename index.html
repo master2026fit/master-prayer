@@ -177,7 +177,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v1.7</div>
+    <div class="version">v1.8</div>
   </header>
 
   <main>
@@ -198,17 +198,19 @@
       </div>
 
       <div class="card daily-routine">
-        <div class="label">📖 오늘의 말씀 + 🙏 기도</div>
-        <div class="title">오늘 5분 루틴</div>
+        <div class="label">🌅 아침 · 🌙 저녁</div>
+        <div class="title">하루 기도 루틴</div>
         <div class="routine-word">
           <div class="ref" id="homeDailyWordRef">오늘의 말씀</div>
           <div class="text" id="homeDailyWordText">말씀을 불러오는 중…</div>
         </div>
-        <p class="hint">말씀 한 구절 → 오늘의 기도 → 내 말로 1분 기도. 짧게라도 매일 이어가는 훈련이야.</p>
+        <p class="hint">아침에는 말씀과 오늘의 기도로 하루를 맡기고, 저녁에는 하루를 돌아보며 감사와 걱정을 내려놓는 루틴이야.</p>
         <div class="row" style="margin-top:10px">
-          <button class="btn primary" onclick="startDailyRoutine()">오늘 5분 루틴 시작</button>
-          <button class="btn ghost" onclick="openTodayBibleFromHome()">성경에서 보기</button>
+          <button class="btn primary" onclick="startDailyRoutine('morning')">🌅 아침 5분</button>
+          <button class="btn secondary" onclick="startDailyRoutine('evening')">🌙 저녁 5분</button>
         </div>
+        <div class="small" id="routineStatus" style="margin-top:10px;text-align:center"></div>
+        <button class="btn ghost full" style="margin-top:8px" onclick="openTodayBibleFromHome()">오늘 말씀 성경에서 보기</button>
       </div>
 
       <div class="section-title">지금 기도하기</div>
@@ -1427,7 +1429,7 @@ let calendarCursor = new Date();
 let selectedDateKey = null;
 let editingPrayerId = null;
 let currentPrayerIndex = null;
-let dailyRoutineStep=1, routineInterval=null;
+let dailyRoutineStep=1, routineInterval=null, dailyRoutineMode='morning';
 
 function pad(n){return String(n).padStart(2,'0')}
 function localDateKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
@@ -1667,7 +1669,9 @@ function getData(){
     requests:JSON.parse(localStorage.getItem('prayerRequests')||'[]'),
     situationFavorites:JSON.parse(localStorage.getItem('situationFavorites')||'[]'),
     situationPrayerFavorites:JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]'),
-    trainingLevel:localStorage.getItem('trainingLevel')||'beginner'
+    trainingLevel:localStorage.getItem('trainingLevel')||'beginner',
+    morningRoutineDone:getRoutineDone('morningRoutineDone'),
+    eveningRoutineDone:getRoutineDone('eveningRoutineDone')
   };
 }
 function markTodayDone(show=true){
@@ -1892,11 +1896,11 @@ function calcStreak(done){
   return count;
 }
 function exportBackup(){
-  const payload={version:4,exportedAt:new Date().toISOString(),...getData()};
+  const payload={version:5,exportedAt:new Date().toISOString(),...getData()};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`today-prayer-backup-${localDateKey()}.json`;a.click();URL.revokeObjectURL(a.href)
 }
 function importBackup(ev){
-  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));if(['beginner','middle','free'].includes(d.trainingLevel))localStorage.setItem('trainingLevel',d.trainingLevel);renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
+  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));if(['beginner','middle','free'].includes(d.trainingLevel))localStorage.setItem('trainingLevel',d.trainingLevel);if(Array.isArray(d.morningRoutineDone))localStorage.setItem('morningRoutineDone',JSON.stringify(d.morningRoutineDone));if(Array.isArray(d.eveningRoutineDone))localStorage.setItem('eveningRoutineDone',JSON.stringify(d.eveningRoutineDone));renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();renderRoutineStatus();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
 }
 
 const bibleBooks = [{"id": 1, "name": "창세기", "abbr": "창", "chapters": 50, "testament": "구약"}, {"id": 2, "name": "출애굽기", "abbr": "출", "chapters": 40, "testament": "구약"}, {"id": 3, "name": "레위기", "abbr": "레", "chapters": 27, "testament": "구약"}, {"id": 4, "name": "민수기", "abbr": "민", "chapters": 36, "testament": "구약"}, {"id": 5, "name": "신명기", "abbr": "신", "chapters": 34, "testament": "구약"}, {"id": 6, "name": "여호수아", "abbr": "수", "chapters": 24, "testament": "구약"}, {"id": 7, "name": "사사기", "abbr": "삿", "chapters": 21, "testament": "구약"}, {"id": 8, "name": "룻기", "abbr": "룻", "chapters": 4, "testament": "구약"}, {"id": 9, "name": "사무엘상", "abbr": "삼상", "chapters": 31, "testament": "구약"}, {"id": 10, "name": "사무엘하", "abbr": "삼하", "chapters": 24, "testament": "구약"}, {"id": 11, "name": "열왕기상", "abbr": "왕상", "chapters": 22, "testament": "구약"}, {"id": 12, "name": "열왕기하", "abbr": "왕하", "chapters": 25, "testament": "구약"}, {"id": 13, "name": "역대상", "abbr": "대상", "chapters": 29, "testament": "구약"}, {"id": 14, "name": "역대하", "abbr": "대하", "chapters": 36, "testament": "구약"}, {"id": 15, "name": "에스라", "abbr": "스", "chapters": 10, "testament": "구약"}, {"id": 16, "name": "느헤미야", "abbr": "느", "chapters": 13, "testament": "구약"}, {"id": 17, "name": "에스더", "abbr": "에", "chapters": 10, "testament": "구약"}, {"id": 18, "name": "욥기", "abbr": "욥", "chapters": 42, "testament": "구약"}, {"id": 19, "name": "시편", "abbr": "시", "chapters": 150, "testament": "구약"}, {"id": 20, "name": "잠언", "abbr": "잠", "chapters": 31, "testament": "구약"}, {"id": 21, "name": "전도서", "abbr": "전", "chapters": 12, "testament": "구약"}, {"id": 22, "name": "아가", "abbr": "아", "chapters": 8, "testament": "구약"}, {"id": 23, "name": "이사야", "abbr": "사", "chapters": 66, "testament": "구약"}, {"id": 24, "name": "예레미야", "abbr": "렘", "chapters": 52, "testament": "구약"}, {"id": 25, "name": "예레미야애가", "abbr": "애", "chapters": 5, "testament": "구약"}, {"id": 26, "name": "에스겔", "abbr": "겔", "chapters": 48, "testament": "구약"}, {"id": 27, "name": "다니엘", "abbr": "단", "chapters": 12, "testament": "구약"}, {"id": 28, "name": "호세아", "abbr": "호", "chapters": 14, "testament": "구약"}, {"id": 29, "name": "요엘", "abbr": "욜", "chapters": 3, "testament": "구약"}, {"id": 30, "name": "아모스", "abbr": "암", "chapters": 9, "testament": "구약"}, {"id": 31, "name": "오바댜", "abbr": "옵", "chapters": 1, "testament": "구약"}, {"id": 32, "name": "요나", "abbr": "욘", "chapters": 4, "testament": "구약"}, {"id": 33, "name": "미가", "abbr": "미", "chapters": 7, "testament": "구약"}, {"id": 34, "name": "나훔", "abbr": "나", "chapters": 3, "testament": "구약"}, {"id": 35, "name": "하박국", "abbr": "합", "chapters": 3, "testament": "구약"}, {"id": 36, "name": "스바냐", "abbr": "습", "chapters": 3, "testament": "구약"}, {"id": 37, "name": "학개", "abbr": "학", "chapters": 2, "testament": "구약"}, {"id": 38, "name": "스가랴", "abbr": "슥", "chapters": 14, "testament": "구약"}, {"id": 39, "name": "말라기", "abbr": "말", "chapters": 4, "testament": "구약"}, {"id": 40, "name": "마태복음", "abbr": "마", "chapters": 28, "testament": "신약"}, {"id": 41, "name": "마가복음", "abbr": "막", "chapters": 16, "testament": "신약"}, {"id": 42, "name": "누가복음", "abbr": "눅", "chapters": 24, "testament": "신약"}, {"id": 43, "name": "요한복음", "abbr": "요", "chapters": 21, "testament": "신약"}, {"id": 44, "name": "사도행전", "abbr": "행", "chapters": 28, "testament": "신약"}, {"id": 45, "name": "로마서", "abbr": "롬", "chapters": 16, "testament": "신약"}, {"id": 46, "name": "고린도전서", "abbr": "고전", "chapters": 16, "testament": "신약"}, {"id": 47, "name": "고린도후서", "abbr": "고후", "chapters": 13, "testament": "신약"}, {"id": 48, "name": "갈라디아서", "abbr": "갈", "chapters": 6, "testament": "신약"}, {"id": 49, "name": "에베소서", "abbr": "엡", "chapters": 6, "testament": "신약"}, {"id": 50, "name": "빌립보서", "abbr": "빌", "chapters": 4, "testament": "신약"}, {"id": 51, "name": "골로새서", "abbr": "골", "chapters": 4, "testament": "신약"}, {"id": 52, "name": "데살로니가전서", "abbr": "살전", "chapters": 5, "testament": "신약"}, {"id": 53, "name": "데살로니가후서", "abbr": "살후", "chapters": 3, "testament": "신약"}, {"id": 54, "name": "디모데전서", "abbr": "딤전", "chapters": 6, "testament": "신약"}, {"id": 55, "name": "디모데후서", "abbr": "딤후", "chapters": 4, "testament": "신약"}, {"id": 56, "name": "디도서", "abbr": "딛", "chapters": 3, "testament": "신약"}, {"id": 57, "name": "빌레몬서", "abbr": "몬", "chapters": 1, "testament": "신약"}, {"id": 58, "name": "히브리서", "abbr": "히", "chapters": 13, "testament": "신약"}, {"id": 59, "name": "야고보서", "abbr": "약", "chapters": 5, "testament": "신약"}, {"id": 60, "name": "베드로전서", "abbr": "벧전", "chapters": 5, "testament": "신약"}, {"id": 61, "name": "베드로후서", "abbr": "벧후", "chapters": 3, "testament": "신약"}, {"id": 62, "name": "요한1서", "abbr": "요일", "chapters": 5, "testament": "신약"}, {"id": 63, "name": "요한2서", "abbr": "요이", "chapters": 1, "testament": "신약"}, {"id": 64, "name": "요한3서", "abbr": "요삼", "chapters": 1, "testament": "신약"}, {"id": 65, "name": "유다서", "abbr": "유", "chapters": 1, "testament": "신약"}, {"id": 66, "name": "요한계시록", "abbr": "계", "chapters": 22, "testament": "신약"}];
@@ -1995,25 +1999,56 @@ async function renderHomeDailyWord(){
   try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse);textEl.textContent=v?v.text:'구절을 찾지 못했어.'}
   catch(e){textEl.textContent='인터넷 연결 후 한 번 읽으면 저장된 말씀으로 볼 수 있어.'}
 }
-async function startDailyRoutine(){
+function getRoutineDone(key){
+  try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}
+}
+function markRoutineDone(mode){
+  const key=mode==='evening'?'eveningRoutineDone':'morningRoutineDone';
+  const list=getRoutineDone(key),today=localDateKey();
+  if(!list.includes(today)){list.push(today);localStorage.setItem(key,JSON.stringify(list))}
+}
+function renderRoutineStatus(){
+  const el=document.getElementById('routineStatus');if(!el)return;
+  const today=localDateKey();
+  const am=getRoutineDone('morningRoutineDone').includes(today);
+  const pm=getRoutineDone('eveningRoutineDone').includes(today);
+  el.textContent=`오늘  아침 ${am?'✓':'○'}  ·  저녁 ${pm?'✓':'○'}`;
+}
+async function startDailyRoutine(mode='morning'){
+  dailyRoutineMode=mode==='evening'?'evening':'morning';
   clearInterval(routineInterval);dailyRoutineStep=1;
   document.getElementById('modal').classList.add('show');
   await renderDailyRoutine();
 }
+function routineBars(){return `<div class="routine-steps"><span class="${dailyRoutineStep>=1?'on':''}"></span><span class="${dailyRoutineStep>=2?'on':''}"></span><span class="${dailyRoutineStep>=3?'on':''}"></span></div>`}
 async function renderDailyRoutine(){
   clearInterval(routineInterval);
   const title=document.getElementById('modalTitle'),body=document.getElementById('modalBody');
-  title.textContent='🙏 오늘 5분 루틴';
-  const bars=`<div class="routine-steps"><span class="${dailyRoutineStep>=1?'on':''}"></span><span class="${dailyRoutineStep>=2?'on':''}"></span><span class="${dailyRoutineStep>=3?'on':''}"></span></div>`;
-  if(dailyRoutineStep===1){
-    const r=dailyBibleRef(),b=bibleBook(r.book),ref=`${b.name} ${r.chapter}:${r.verse}`;
-    body.innerHTML=`${bars}<div class="label">1단계 · 말씀 한 구절</div><div class="routine-step-title">천천히 한 번 읽어봐</div><div class="quote"><strong>${escapeHtml(ref)}</strong><br><span id="routineVerseText">말씀을 불러오는 중…</span></div><p class="hint">마음에 걸리는 단어나 문장이 있으면 잠시 머물러도 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 오늘의 기도</button>`;
-    try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse),el=document.getElementById('routineVerseText');if(el)el.textContent=v?v.text:'구절을 찾지 못했어.'}catch(e){const el=document.getElementById('routineVerseText');if(el)el.textContent='말씀을 불러오지 못했어. 그래도 다음 단계의 기도는 계속할 수 있어.'}
-  }else if(dailyRoutineStep===2){
-    const p=dailyPrayers[dailyIndex()];
-    body.innerHTML=`${bars}<div class="label">2단계 · 오늘의 기도</div><div class="routine-step-title">기도문을 천천히 읽어봐</div><div class="prayer">${escapeHtml(p.text)}</div><p class="hint">그대로 읽어도 되고, 마음에 맞는 문장은 네 말로 바꿔도 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 내 말로 1분</button>`;
+  const morning=dailyRoutineMode==='morning';
+  title.textContent=morning?'🌅 아침 5분 루틴':'🌙 저녁 5분 루틴';
+  const bars=routineBars();
+  if(morning){
+    if(dailyRoutineStep===1){
+      const r=dailyBibleRef(),b=bibleBook(r.book),ref=`${b.name} ${r.chapter}:${r.verse}`;
+      body.innerHTML=`${bars}<div class="label">1단계 · 오늘의 말씀</div><div class="routine-step-title">말씀으로 하루를 시작해</div><div class="quote"><strong>${escapeHtml(ref)}</strong><br><span id="routineVerseText">말씀을 불러오는 중…</span></div><p class="hint">마음에 들어오는 한 단어나 문장을 잠시 붙들어봐.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 오늘의 기도</button>`;
+      try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse),el=document.getElementById('routineVerseText');if(el)el.textContent=v?v.text:'구절을 찾지 못했어.'}catch(e){const el=document.getElementById('routineVerseText');if(el)el.textContent='말씀을 불러오지 못했어. 다음 단계의 기도는 계속할 수 있어.'}
+    }else if(dailyRoutineStep===2){
+      const p=dailyPrayers[dailyIndex()];
+      body.innerHTML=`${bars}<div class="label">2단계 · 오늘의 기도</div><div class="routine-step-title">오늘 하루를 맡겨봐</div><div class="prayer">${escapeHtml(p.text)}</div><p class="hint">그대로 읽어도 되고 마음에 맞는 문장은 네 말로 바꿔도 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 내 말로 1분</button>`;
+    }else{
+      body.innerHTML=`${bars}<div class="label">3단계 · 내 말로 기도</div><div class="routine-step-title">오늘 하루를 하나님께 맡겨봐</div><div class="prompt">오늘 해야 할 일, 만날 사람, 걱정되는 일 한 가지를 떠올리고 네 말로 기도해봐.</div><div class="timer" id="routineTimer">01:00</div><button class="btn secondary full" id="routineStartBtn" onclick="startRoutineTimer()">1분 시작</button><button class="btn good full" style="margin-top:8px" onclick="completeDailyRoutine()">아침 루틴 완료 ✓</button>`;
+    }
   }else{
-    body.innerHTML=`${bars}<div class="label">3단계 · 내 말로 기도</div><div class="routine-step-title">이제 화면보다 네 마음을 말해봐</div><div class="prompt">오늘 말씀과 기도문에서 마음에 남은 한 가지를 하나님께 네 말로 말씀드려봐.</div><div class="timer" id="routineTimer">01:00</div><button class="btn secondary full" id="routineStartBtn" onclick="startRoutineTimer()">1분 시작</button><button class="btn good full" style="margin-top:8px" onclick="completeDailyRoutine()">오늘 루틴 완료 ✓</button>`;
+    if(dailyRoutineStep===1){
+      body.innerHTML=`${bars}<div class="label">1단계 · 하루 돌아보기</div><div class="routine-step-title">오늘을 조용히 돌아봐</div><div class="prompt"><strong>감사</strong> · 오늘 감사했던 한 가지</div><div class="prompt"><strong>돌아봄</strong> · 아쉽거나 잘못했던 한 가지</div><div class="prompt"><strong>맡김</strong> · 아직 마음에 남아 있는 걱정 한 가지</div><p class="hint">답을 적을 필요는 없어. 하나씩 떠올리며 하나님께 말씀드리면 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 잠들기 전 기도</button>`;
+    }else if(dailyRoutineStep===2){
+      const c=categories.find(x=>x.name==='잠들기 전');
+      const arr=(c&&Array.isArray(c.prayers)&&c.prayers.length)?c.prayers:[{title:'잠들기 전 기도',text:c?c.text:'하나님, 오늘 하루를 감사하며 모든 걱정을 맡깁니다. 편안히 쉬게 해주세요. 아멘.'}];
+      const p=arr[dailyIndex()%arr.length];
+      body.innerHTML=`${bars}<div class="label">2단계 · 잠들기 전 기도</div><div class="routine-step-title">오늘을 내려놓고 쉬어</div><div class="prayer">${escapeHtml(p.text)}</div><p class="hint">오늘 해결하지 못한 일까지 붙잡고 있지 말고 내려놓는 연습을 해봐.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 내 말로 1분</button>`;
+    }else{
+      body.innerHTML=`${bars}<div class="label">3단계 · 내 말로 기도</div><div class="routine-step-title">감사하고, 돌아보고, 맡겨봐</div><div class="prompt">“감사합니다” 한 가지 → “용서해주세요” 또는 “도와주세요” 한 가지 → “이제 맡깁니다” 한 가지 순서로 네 말로 기도해봐.</div><div class="timer" id="routineTimer">01:00</div><button class="btn secondary full" id="routineStartBtn" onclick="startRoutineTimer()">1분 시작</button><button class="btn good full" style="margin-top:8px" onclick="completeDailyRoutine()">저녁 루틴 완료 ✓</button>`;
+    }
   }
 }
 function nextDailyRoutine(){dailyRoutineStep=Math.min(3,dailyRoutineStep+1);renderDailyRoutine()}
@@ -2021,7 +2056,16 @@ function startRoutineTimer(){
   clearInterval(routineInterval);let sec=60;const el=document.getElementById('routineTimer'),btn=document.getElementById('routineStartBtn');if(btn){btn.disabled=true;btn.style.opacity='.55'};if(el)el.textContent='01:00';
   routineInterval=setInterval(()=>{sec--;const m=Math.floor(sec/60),s=sec%60;if(el)el.textContent=`${pad(m)}:${pad(s)}`;if(sec<=0){clearInterval(routineInterval);if(el)el.textContent='완료 ✓';if(btn){btn.textContent='1분 완료';btn.style.opacity='1'}}},1000)
 }
-function completeDailyRoutine(){markTodayDone(false);localStorage.setItem('lastDailyRoutine',localDateKey());closeModal();document.getElementById('modalTitle').textContent='오늘 루틴 완료 ✓';document.getElementById('modalBody').innerHTML='<div class="quote">말씀을 읽고, 기도문으로 시작하고, 마지막에는 네 말로 기도했어. 이 흐름을 매일 반복하면 점점 기도문 없이도 자연스럽게 기도할 수 있어.</div>';document.getElementById('modal').classList.add('show')}
+function completeDailyRoutine(){
+  markTodayDone(false);markRoutineDone(dailyRoutineMode);renderRoutineStatus();
+  const morning=dailyRoutineMode==='morning';
+  closeModal();
+  document.getElementById('modalTitle').textContent=morning?'아침 루틴 완료 ✓':'저녁 루틴 완료 ✓';
+  document.getElementById('modalBody').innerHTML=morning
+    ?'<div class="quote">말씀을 읽고 오늘의 기도로 시작한 뒤 네 말로 하루를 맡겼어. 이제 오늘 할 한 가지를 차분히 시작해봐.</div>'
+    :'<div class="quote">오늘을 감사로 돌아보고 부족함과 걱정을 내려놓았어. 해결되지 않은 일은 잠시 맡겨두고 편안히 쉬어도 돼.</div>';
+  document.getElementById('modal').classList.add('show');
+}
 function scrollBibleTarget(){if(!bibleTargetVerse)return;const el=document.getElementById(`bibleVerse-${bibleTargetVerse}`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.background='#fff7df';setTimeout(()=>el.style.background='',1800)}bibleTargetVerse=null}
 async function downloadBibleOffline(){
   const btn=document.getElementById('offlineBibleBtn'),st=document.getElementById('offlineBibleStatus');btn.disabled=true;btn.style.opacity='.6';st.textContent='개역한글 전체 본문을 받는 중… 잠시 기다려줘.';
@@ -2039,7 +2083,7 @@ function initBibleView(){
 }
 
 document.getElementById('todayLabel').textContent=formatToday();
-renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();setTrainingLevel(trainingLevel,false);renderHomeDailyWord();
+renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();setTrainingLevel(trainingLevel,false);renderHomeDailyWord();renderRoutineStatus();
 // 터치 후 버튼 잔상(포커스/탭 하이라이트) 제거
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTimeout(()=>b.blur(),0)});
 
@@ -2047,7 +2091,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=1.7');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.8');
       await reg.update();
     }catch(e){}
   });
