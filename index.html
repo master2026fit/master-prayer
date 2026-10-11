@@ -63,10 +63,17 @@
     .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
     .dow,.day{text-align:center;font-size:13px;padding:8px 0;border-radius:10px}
     .dow{color:var(--muted);font-weight:800}
-    .day{background:#fff;border:1px solid var(--line);min-height:40px;position:relative}
-    .day.empty{background:transparent;border:0}
-    .day.today{outline:2px solid var(--primary)}
+    .day{background:#fff;border:1px solid var(--line);min-height:40px;position:relative;cursor:pointer;color:var(--text)}
+    button.day{font:inherit;width:100%;padding:8px 0}
+    .day.empty{background:transparent;border:0;cursor:default}
+    .day.today{outline:2px solid var(--primary);outline-offset:1px}
     .day.done{background:#eaf3eb;border-color:#b9d0bd;color:#36583d;font-weight:900}
+    .day.selected{box-shadow:inset 0 0 0 3px var(--primary);background:var(--soft);color:var(--primary);font-weight:900;outline:none}
+    .day.done.selected{background:#e3efe5;color:#36583d}
+    .day.future{color:#9d96a1}
+    .calendar-selection{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff}
+    .calendar-selection strong{display:block;font-size:17px;margin:3px 0}
+    .calendar-selection .row{margin-top:10px}
     .streak{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
     .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
     .stat strong{display:block;font-size:24px;color:var(--primary)}
@@ -186,9 +193,18 @@
           <button onclick="changeMonth(1)">›</button>
         </div>
         <div class="calendar" id="calendar"></div>
+        <div class="calendar-selection" id="calendarSelection">
+          <div class="label">선택한 날짜</div>
+          <strong id="selectedDateLabel">날짜를 눌러 선택해</strong>
+          <div class="hint" id="selectedDateStatus"></div>
+          <div class="row">
+            <button class="btn secondary" id="selectedPrayerBtn" onclick="openSelectedDatePrayer()">기도문 보기</button>
+            <button class="btn good" id="selectedDoneBtn" onclick="toggleSelectedDone()">기도 완료 기록</button>
+          </div>
+        </div>
         <div class="streak">
           <div class="stat"><strong id="streakCount">0</strong>연속 기도</div>
-          <div class="stat"><strong id="monthCount">0</strong>이번 달</div>
+          <div class="stat"><strong id="monthCount">0</strong><span id="monthCountLabel">이번 달</span></div>
         </div>
       </div>
     </section>
@@ -235,11 +251,16 @@ const categories = [
 
 let trainingStep=1, sentenceIndex=0, miniInterval=null, timerInterval=null;
 let calendarCursor = new Date();
+let selectedDateKey = null;
 
 function pad(n){return String(n).padStart(2,'0')}
 function localDateKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
-function formatToday(){const d=new Date(); return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${['일','월','화','수','목','금','토'][d.getDay()]}요일`}
-function dailyIndex(){const d=new Date(); const start=new Date(d.getFullYear(),0,0); const diff=d-start; const day=Math.floor(diff/86400000); return day % dailyPrayers.length}
+function dateFromKey(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
+function formatDateKey(k){const d=dateFromKey(k);return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${['일','월','화','수','목','금','토'][d.getDay()]}요일`}
+function formatToday(){return formatDateKey(localDateKey())}
+function dailyIndexForDate(d){const day=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,1))/86400000);return ((day%dailyPrayers.length)+dailyPrayers.length)%dailyPrayers.length}
+function dailyIndex(){return dailyIndexForDate(new Date())}
+function isFutureKey(k){const d=dateFromKey(k);d.setHours(0,0,0,0);const t=new Date();t.setHours(0,0,0,0);return d>t}
 
 function renderDaily(){
   const p=dailyPrayers[dailyIndex()];
@@ -312,7 +333,7 @@ function getData(){
   return {done:JSON.parse(localStorage.getItem('prayerDone')||'[]'), prayers:JSON.parse(localStorage.getItem('myPrayers')||'[]')};
 }
 function markTodayDone(show=true){
-  const data=getData(); const k=localDateKey(); if(!data.done.includes(k)){data.done.push(k);localStorage.setItem('prayerDone',JSON.stringify(data.done));}
+  const data=getData(); const k=localDateKey(); selectedDateKey=k; if(!data.done.includes(k)){data.done.push(k);localStorage.setItem('prayerDone',JSON.stringify(data.done));}
   if(show){
     document.getElementById('modalTitle').textContent='오늘 기도 완료 ✓';
     document.getElementById('modalBody').innerHTML='<div class="quote">잘했어. 길게 하지 않아도 매일 하나님께 마음을 드리는 시간이 쌓이는 게 중요해.</div>';
@@ -339,22 +360,85 @@ function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 function openSaved(id){const p=JSON.parse(localStorage.getItem('myPrayers')||'[]').find(x=>x.id===id);if(!p)return;document.getElementById('modalTitle').textContent=p.title;document.getElementById('modalBody').innerHTML=`<div class="prayer">${escapeHtml(p.body)}</div>`;document.getElementById('modal').classList.add('show')}
 function deletePrayer(id){if(!confirm('이 기도문을 삭제할까?'))return;const list=JSON.parse(localStorage.getItem('myPrayers')||'[]').filter(p=>p.id!==id);localStorage.setItem('myPrayers',JSON.stringify(list));renderMyPrayers()}
 
-function changeMonth(delta){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);renderCalendar()}
+function changeMonth(delta){
+  calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);
+  selectedDateKey=null;
+  renderCalendar();
+}
+function selectCalendarDate(k){
+  selectedDateKey=k;
+  renderCalendar();
+}
+function renderCalendarSelection(done){
+  const label=document.getElementById('selectedDateLabel');
+  const status=document.getElementById('selectedDateStatus');
+  const prayerBtn=document.getElementById('selectedPrayerBtn');
+  const doneBtn=document.getElementById('selectedDoneBtn');
+  if(!selectedDateKey){
+    label.textContent='날짜를 눌러 선택해';
+    status.textContent='날짜를 누르면 그날의 기도문을 보거나 기도 기록을 남길 수 있어.';
+    prayerBtn.disabled=true; prayerBtn.style.opacity='.45';
+    doneBtn.style.display='none';
+    return;
+  }
+  label.textContent=formatDateKey(selectedDateKey);
+  prayerBtn.disabled=false; prayerBtn.style.opacity='1';
+  const future=isFutureKey(selectedDateKey);
+  const complete=done.includes(selectedDateKey);
+  if(future){
+    status.textContent='미리 기도문은 볼 수 있어. 미래 날짜는 완료 기록하지 않아.';
+    doneBtn.style.display='none';
+  }else{
+    status.textContent=complete?'✓ 기도 완료로 기록되어 있어.':'아직 기도 완료 기록이 없어.';
+    doneBtn.style.display='block';
+    doneBtn.textContent=complete?'완료 기록 취소':'기도 완료 기록';
+    doneBtn.className=complete?'btn ghost':'btn good';
+  }
+}
+function openSelectedDatePrayer(){
+  if(!selectedDateKey)return;
+  const d=dateFromKey(selectedDateKey);
+  const p=dailyPrayers[dailyIndexForDate(d)];
+  const done=getData().done.includes(selectedDateKey);
+  const future=isFutureKey(selectedDateKey);
+  document.getElementById('modalTitle').textContent=`🙏 ${formatDateKey(selectedDateKey)}`;
+  let action='';
+  if(!future){
+    action=`<button class="btn ${done?'ghost':'good'} full" style="margin-top:14px" onclick="toggleSelectedDone();closeModal()">${done?'완료 기록 취소':'기도 완료 기록 ✓'}</button>`;
+  }
+  document.getElementById('modalBody').innerHTML=`<div class="label">${escapeHtml(p.title)}</div><div class="prayer" style="margin-top:8px">${escapeHtml(p.text)}</div>${action}`;
+  document.getElementById('modal').classList.add('show');
+}
+function toggleSelectedDone(){
+  if(!selectedDateKey)return;
+  if(isFutureKey(selectedDateKey)){alert('미래 날짜에는 완료 기록을 남기지 않아.');return}
+  const data=getData();
+  if(data.done.includes(selectedDateKey)) data.done=data.done.filter(k=>k!==selectedDateKey);
+  else data.done.push(selectedDateKey);
+  localStorage.setItem('prayerDone',JSON.stringify(data.done));
+  renderCalendar();
+}
 function renderCalendar(){
   const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
   const first=new Date(y,m,1), last=new Date(y,m+1,0);
   const done=getData().done;
+  const todayKey=localDateKey();
+  if(selectedDateKey===null && y===new Date().getFullYear() && m===new Date().getMonth()) selectedDateKey=todayKey;
   document.getElementById('monthLabel').textContent=`${y}년 ${m+1}월`;
   const dows=['일','월','화','수','목','금','토'].map(x=>`<div class="dow">${x}</div>`).join('');
   let cells=''; for(let i=0;i<first.getDay();i++)cells+='<div class="day empty"></div>';
   let monthCount=0;
   for(let day=1;day<=last.getDate();day++){
-    const d=new Date(y,m,day);const k=localDateKey(d);const isDone=done.includes(k);if(isDone)monthCount++;
-    const today=k===localDateKey();cells+=`<div class="day ${isDone?'done':''} ${today?'today':''}">${day}${isDone?' ✓':''}</div>`;
+    const d=new Date(y,m,day),k=localDateKey(d),isDone=done.includes(k),today=k===todayKey,selected=k===selectedDateKey,future=isFutureKey(k);
+    if(isDone)monthCount++;
+    cells+=`<button type="button" class="day ${isDone?'done':''} ${today?'today':''} ${selected?'selected':''} ${future?'future':''}" onclick="selectCalendarDate('${k}')" aria-label="${formatDateKey(k)}${isDone?' 기도 완료':''}">${day}${isDone?' ✓':''}</button>`;
   }
   document.getElementById('calendar').innerHTML=dows+cells;
   document.getElementById('monthCount').textContent=monthCount;
+  const now=new Date();
+  document.getElementById('monthCountLabel').textContent=(y===now.getFullYear()&&m===now.getMonth())?'이번 달':`${m+1}월`;
   document.getElementById('streakCount').textContent=calcStreak(done);
+  renderCalendarSelection(done);
 }
 function calcStreak(done){
   const set=new Set(done); let d=new Date(); let count=0;
