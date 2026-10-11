@@ -154,6 +154,14 @@
     .daily-word-ref{font-size:14px;color:var(--primary);font-weight:900;margin-bottom:8px}
     .daily-word-text{font-size:18px;line-height:1.75;min-height:28px}
     .bible-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .daily-routine{background:linear-gradient(145deg,#fffdf9 0%,#f7f1e7 100%);border:1px solid rgba(196,155,99,.18)}
+    .routine-word{padding:13px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;margin:10px 0}
+    .routine-word .ref{font-size:13px;font-weight:900;color:var(--primary);margin-bottom:5px}
+    .routine-word .text{font-size:17px;line-height:1.75}
+    .routine-steps{display:flex;gap:6px;margin:10px 0 2px}
+    .routine-steps span{flex:1;height:7px;border-radius:10px;background:#e8e0eb}
+    .routine-steps span.on{background:var(--primary)}
+    .routine-step-title{font-size:18px;font-weight:900;margin:4px 0 8px}
     .read-pill{display:inline-block;font-size:12px;font-weight:800;color:var(--good);background:#eaf3eb;border-radius:999px;padding:4px 8px}
 
     .resource-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
@@ -169,7 +177,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v1.6.1</div>
+    <div class="version">v1.7</div>
   </header>
 
   <main>
@@ -186,6 +194,20 @@
         <div class="top-actions">
           <button class="btn primary" onclick="startTraining()">기도 시작</button>
           <button class="btn good" onclick="markTodayDone()">기도 완료 ✓</button>
+        </div>
+      </div>
+
+      <div class="card daily-routine">
+        <div class="label">📖 오늘의 말씀 + 🙏 기도</div>
+        <div class="title">오늘 5분 루틴</div>
+        <div class="routine-word">
+          <div class="ref" id="homeDailyWordRef">오늘의 말씀</div>
+          <div class="text" id="homeDailyWordText">말씀을 불러오는 중…</div>
+        </div>
+        <p class="hint">말씀 한 구절 → 오늘의 기도 → 내 말로 1분 기도. 짧게라도 매일 이어가는 훈련이야.</p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" onclick="startDailyRoutine()">오늘 5분 루틴 시작</button>
+          <button class="btn ghost" onclick="openTodayBibleFromHome()">성경에서 보기</button>
         </div>
       </div>
 
@@ -1405,6 +1427,7 @@ let calendarCursor = new Date();
 let selectedDateKey = null;
 let editingPrayerId = null;
 let currentPrayerIndex = null;
+let dailyRoutineStep=1, routineInterval=null;
 
 function pad(n){return String(n).padStart(2,'0')}
 function localDateKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
@@ -1546,7 +1569,7 @@ function renderSituationModal(){
       <button class="btn good" onclick="markTodayDone();closeModal()">기도 완료 ✓</button>
     </div>`;
 }
-function closeModal(){document.getElementById('modal').classList.remove('show');clearInterval(timerInterval)}
+function closeModal(){document.getElementById('modal').classList.remove('show');clearInterval(timerInterval);clearInterval(routineInterval)}
 function showView(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -1960,6 +1983,45 @@ async function renderDailyBibleWord(){
   try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse);document.getElementById('dailyWordText').textContent=v?v.text:'구절을 찾지 못했어.'}catch(e){document.getElementById('dailyWordText').textContent='인터넷 연결 후 한 번 열면 이후에는 저장된 말씀을 사용할 수 있어.'}
 }
 function openDailyWord(){const r=dailyBibleRef();bibleBookId=r.book;bibleChapter=r.chapter;bibleTargetVerse=r.verse;document.getElementById('bibleBookSelect').value=String(bibleBookId);renderBibleChapterOptions();loadBibleChapter()}
+function openTodayBibleFromHome(){
+  const btn=[...document.querySelectorAll('nav button')].find(b=>b.dataset.view==='bible');
+  showView('bible',btn);
+  const r=dailyBibleRef();bibleBookId=r.book;bibleChapter=r.chapter;bibleTargetVerse=r.verse;
+  initBibleView();document.getElementById('bibleBookSelect').value=String(bibleBookId);renderBibleChapterOptions();loadBibleChapter();
+}
+async function renderHomeDailyWord(){
+  const refEl=document.getElementById('homeDailyWordRef'),textEl=document.getElementById('homeDailyWordText');if(!refEl||!textEl)return;
+  const r=dailyBibleRef(),b=bibleBook(r.book);refEl.textContent=`${b.name} ${r.chapter}:${r.verse}`;textEl.textContent='말씀을 불러오는 중…';
+  try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse);textEl.textContent=v?v.text:'구절을 찾지 못했어.'}
+  catch(e){textEl.textContent='인터넷 연결 후 한 번 읽으면 저장된 말씀으로 볼 수 있어.'}
+}
+async function startDailyRoutine(){
+  clearInterval(routineInterval);dailyRoutineStep=1;
+  document.getElementById('modal').classList.add('show');
+  await renderDailyRoutine();
+}
+async function renderDailyRoutine(){
+  clearInterval(routineInterval);
+  const title=document.getElementById('modalTitle'),body=document.getElementById('modalBody');
+  title.textContent='🙏 오늘 5분 루틴';
+  const bars=`<div class="routine-steps"><span class="${dailyRoutineStep>=1?'on':''}"></span><span class="${dailyRoutineStep>=2?'on':''}"></span><span class="${dailyRoutineStep>=3?'on':''}"></span></div>`;
+  if(dailyRoutineStep===1){
+    const r=dailyBibleRef(),b=bibleBook(r.book),ref=`${b.name} ${r.chapter}:${r.verse}`;
+    body.innerHTML=`${bars}<div class="label">1단계 · 말씀 한 구절</div><div class="routine-step-title">천천히 한 번 읽어봐</div><div class="quote"><strong>${escapeHtml(ref)}</strong><br><span id="routineVerseText">말씀을 불러오는 중…</span></div><p class="hint">마음에 걸리는 단어나 문장이 있으면 잠시 머물러도 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 오늘의 기도</button>`;
+    try{const ch=await fetchBibleChapter(r.book,r.chapter),v=ch.verses.find(x=>x.verse===r.verse),el=document.getElementById('routineVerseText');if(el)el.textContent=v?v.text:'구절을 찾지 못했어.'}catch(e){const el=document.getElementById('routineVerseText');if(el)el.textContent='말씀을 불러오지 못했어. 그래도 다음 단계의 기도는 계속할 수 있어.'}
+  }else if(dailyRoutineStep===2){
+    const p=dailyPrayers[dailyIndex()];
+    body.innerHTML=`${bars}<div class="label">2단계 · 오늘의 기도</div><div class="routine-step-title">기도문을 천천히 읽어봐</div><div class="prayer">${escapeHtml(p.text)}</div><p class="hint">그대로 읽어도 되고, 마음에 맞는 문장은 네 말로 바꿔도 돼.</p><button class="btn primary full" onclick="nextDailyRoutine()">다음 · 내 말로 1분</button>`;
+  }else{
+    body.innerHTML=`${bars}<div class="label">3단계 · 내 말로 기도</div><div class="routine-step-title">이제 화면보다 네 마음을 말해봐</div><div class="prompt">오늘 말씀과 기도문에서 마음에 남은 한 가지를 하나님께 네 말로 말씀드려봐.</div><div class="timer" id="routineTimer">01:00</div><button class="btn secondary full" id="routineStartBtn" onclick="startRoutineTimer()">1분 시작</button><button class="btn good full" style="margin-top:8px" onclick="completeDailyRoutine()">오늘 루틴 완료 ✓</button>`;
+  }
+}
+function nextDailyRoutine(){dailyRoutineStep=Math.min(3,dailyRoutineStep+1);renderDailyRoutine()}
+function startRoutineTimer(){
+  clearInterval(routineInterval);let sec=60;const el=document.getElementById('routineTimer'),btn=document.getElementById('routineStartBtn');if(btn){btn.disabled=true;btn.style.opacity='.55'};if(el)el.textContent='01:00';
+  routineInterval=setInterval(()=>{sec--;const m=Math.floor(sec/60),s=sec%60;if(el)el.textContent=`${pad(m)}:${pad(s)}`;if(sec<=0){clearInterval(routineInterval);if(el)el.textContent='완료 ✓';if(btn){btn.textContent='1분 완료';btn.style.opacity='1'}}},1000)
+}
+function completeDailyRoutine(){markTodayDone(false);localStorage.setItem('lastDailyRoutine',localDateKey());closeModal();document.getElementById('modalTitle').textContent='오늘 루틴 완료 ✓';document.getElementById('modalBody').innerHTML='<div class="quote">말씀을 읽고, 기도문으로 시작하고, 마지막에는 네 말로 기도했어. 이 흐름을 매일 반복하면 점점 기도문 없이도 자연스럽게 기도할 수 있어.</div>';document.getElementById('modal').classList.add('show')}
 function scrollBibleTarget(){if(!bibleTargetVerse)return;const el=document.getElementById(`bibleVerse-${bibleTargetVerse}`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.background='#fff7df';setTimeout(()=>el.style.background='',1800)}bibleTargetVerse=null}
 async function downloadBibleOffline(){
   const btn=document.getElementById('offlineBibleBtn'),st=document.getElementById('offlineBibleStatus');btn.disabled=true;btn.style.opacity='.6';st.textContent='개역한글 전체 본문을 받는 중… 잠시 기다려줘.';
@@ -1977,7 +2039,7 @@ function initBibleView(){
 }
 
 document.getElementById('todayLabel').textContent=formatToday();
-renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();setTrainingLevel(trainingLevel,false);
+renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();setTrainingLevel(trainingLevel,false);renderHomeDailyWord();
 // 터치 후 버튼 잔상(포커스/탭 하이라이트) 제거
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTimeout(()=>b.blur(),0)});
 
@@ -1985,7 +2047,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=1.6.1');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.7');
       await reg.update();
     }catch(e){}
   });
