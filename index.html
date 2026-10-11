@@ -155,6 +155,20 @@
     .daily-word-text{font-size:18px;line-height:1.75;min-height:28px}
     .bible-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .read-pill{display:inline-block;font-size:12px;font-weight:800;color:var(--good);background:#eaf3eb;border-radius:999px;padding:4px 8px}
+
+    .resource-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+    .resource-tab{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:14px;padding:11px 8px;font-weight:900;cursor:pointer}
+    .resource-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .resource-panel{display:none}.resource-panel.active{display:block}
+    .hymn-hero{background:linear-gradient(145deg,#fffdf9 0%,#fff6e6 100%)}
+    .hymn-number{display:inline-block;font-size:12px;font-weight:900;color:#8a6738;background:#fff1d8;border-radius:999px;padding:4px 8px;margin-bottom:8px}
+    .hymn-reason{font-size:15px;line-height:1.65;color:var(--muted);margin:8px 0 12px}
+    .hymn-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
+    .hymn-card-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .hymn-card-title{font-size:17px;font-weight:900;line-height:1.4}
+    .hymn-meta{font-size:12px;color:var(--muted);margin-top:3px}
+    .hymn-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .hymn-search{margin:8px 0 10px}
     @media(max-width:420px){.prayer{font-size:18px}.grid{grid-template-columns:1fr 1fr}.title{font-size:21px}}
   </style>
 </head>
@@ -164,7 +178,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v1.5</div>
+    <div class="version">v1.6</div>
   </header>
 
   <main>
@@ -300,6 +314,11 @@
     </section>
 
     <section id="bible" class="view">
+      <div class="resource-tabs">
+        <button class="resource-tab active" data-resource="bible" onclick="setFaithResource('bible')">📖 말씀</button>
+        <button class="resource-tab" data-resource="hymn" onclick="setFaithResource('hymn')">🎵 찬송</button>
+      </div>
+      <div class="resource-panel active" id="biblePanel">
       <div class="card bible-hero">
         <div class="label">📖 오늘의 말씀</div>
         <div class="title" id="dailyWordTitle">오늘 붙들 말씀</div>
@@ -342,6 +361,35 @@
         <button class="btn secondary full" onclick="downloadBibleOffline()" id="offlineBibleBtn">성경 전체 오프라인 저장</button>
         <div class="bible-status" id="offlineBibleStatus"></div>
         <p class="bible-note">성경 본문은 개역한글(KRV)을 사용해. 개역개정은 저작권 보호 본문이라 이 앱에 포함하지 않아. 온라인 본문은 Bolls.life 공개 API를 이용하고, 오프라인 저장은 사용자의 폰 안에만 보관돼.</p>
+      </div>
+
+      </div>
+      <div class="resource-panel" id="hymnPanel">
+        <div class="card hymn-hero">
+          <div class="label">🎵 오늘 추천 찬송</div>
+          <div class="hymn-number" id="dailyHymnNumber"></div>
+          <div class="title" id="dailyHymnTitle"></div>
+          <div class="hymn-reason" id="dailyHymnReason"></div>
+          <div class="row">
+            <button class="btn secondary" id="dailyHymnFavBtn" onclick="toggleDailyHymnFavorite()">☆ 즐겨찾기</button>
+            <button class="btn ghost" onclick="openDailyHymnOfficial()">공식 페이지에서 찾기</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">찬송 찾기</div>
+          <div class="title">상황에 맞는 찬송 추천</div>
+          <input class="hymn-search" id="hymnSearch" type="search" placeholder="번호·제목·상황으로 찾아봐" oninput="renderHymns()" />
+          <div class="chips" id="hymnChips"></div>
+          <p class="hint">가사·악보·음원은 넣지 않고, 찬송가 번호·제목과 추천 이유만 보여줘.</p>
+        </div>
+        <div id="hymnFavorites"></div>
+        <div id="hymnList"></div>
+
+        <div class="card">
+          <div class="label">저작권 안내</div>
+          <p class="bible-note" style="margin-top:6px">21세기 새찬송가의 가사·악보·음원은 이 앱에 복제하지 않아. 필요한 찬송은 번호와 제목으로 찾고, 확인은 한국찬송가공회 공식 페이지를 이용하도록 연결했어.</p>
+        </div>
       </div>
     </section>
 
@@ -409,7 +457,7 @@
     <button class="active" data-view="home" onclick="showView('home',this)"><b>🏠</b>오늘</button>
     <button data-view="situations" onclick="showView('situations',this)"><b>🙏</b>상황별</button>
     <button data-view="training" onclick="showView('training',this)"><b>🌱</b>훈련</button>
-    <button data-view="bible" onclick="showView('bible',this)"><b>📖</b>말씀</button>
+    <button data-view="bible" onclick="showView('bible',this)"><b>📖</b>말씀·찬송</button>
     <button data-view="myprayer" onclick="showView('myprayer',this)"><b>✍️</b>나의 기도</button>
     <button data-view="calendarView" onclick="showView('calendarView',this)"><b>📅</b>기록</button>
   </nav>
@@ -1636,7 +1684,8 @@ function getData(){
     requests:JSON.parse(localStorage.getItem('prayerRequests')||'[]'),
     situationFavorites:JSON.parse(localStorage.getItem('situationFavorites')||'[]'),
     situationPrayerFavorites:JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]'),
-    trainingLevel:localStorage.getItem('trainingLevel')||'beginner'
+    trainingLevel:localStorage.getItem('trainingLevel')||'beginner',
+    hymnFavorites:JSON.parse(localStorage.getItem('hymnFavorites')||'[]')
   };
 }
 function markTodayDone(show=true){
@@ -1861,12 +1910,242 @@ function calcStreak(done){
   return count;
 }
 function exportBackup(){
-  const payload={version:3,exportedAt:new Date().toISOString(),...getData()};
+  const payload={version:4,exportedAt:new Date().toISOString(),...getData()};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`today-prayer-backup-${localDateKey()}.json`;a.click();URL.revokeObjectURL(a.href)
 }
 function importBackup(ev){
-  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));if(['beginner','middle','free'].includes(d.trainingLevel))localStorage.setItem('trainingLevel',d.trainingLevel);renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
+  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));if(['beginner','middle','free'].includes(d.trainingLevel))localStorage.setItem('trainingLevel',d.trainingLevel);if(Array.isArray(d.hymnFavorites))localStorage.setItem('hymnFavorites',JSON.stringify(d.hymnFavorites));renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
 }
+
+const hymns = [
+  {
+    "number": 200,
+    "title": "달고 오묘한 그 말씀",
+    "group": "말씀",
+    "reason": "말씀을 읽기 전이나 말씀을 마음에 새기고 싶을 때 잘 어울려.",
+    "tags": [
+      "성경",
+      "말씀",
+      "묵상"
+    ]
+  },
+  {
+    "number": 288,
+    "title": "예수를 나의 구주 삼고",
+    "group": "은혜·구원",
+    "reason": "구원의 기쁨과 감사가 필요한 날에 함께 부르기 좋아.",
+    "tags": [
+      "구원",
+      "기쁨",
+      "감사"
+    ]
+  },
+  {
+    "number": 305,
+    "title": "나 같은 죄인 살리신",
+    "group": "은혜·구원",
+    "reason": "은혜를 다시 기억하고 감사하고 싶을 때 추천해.",
+    "tags": [
+      "은혜",
+      "회개",
+      "감사"
+    ]
+  },
+  {
+    "number": 310,
+    "title": "아 하나님의 은혜로",
+    "group": "믿음·의지",
+    "reason": "내 형편을 맡기고 하나님의 은혜를 의지하고 싶을 때 좋아.",
+    "tags": [
+      "은혜",
+      "믿음",
+      "의지"
+    ]
+  },
+  {
+    "number": 336,
+    "title": "환난과 핍박 중에도",
+    "group": "고난·회복",
+    "reason": "어려움 속에서도 믿음을 지키고 싶을 때 힘을 주는 찬송이야.",
+    "tags": [
+      "고난",
+      "환난",
+      "믿음"
+    ]
+  },
+  {
+    "number": 337,
+    "title": "내 모든 시험 무거운 짐을",
+    "group": "걱정·평안",
+    "reason": "마음의 짐과 걱정을 내려놓고 기도할 때 잘 맞아.",
+    "tags": [
+      "시험",
+      "걱정",
+      "짐",
+      "기도"
+    ]
+  },
+  {
+    "number": 338,
+    "title": "내 주를 가까이 하게 함은",
+    "group": "믿음·의지",
+    "reason": "힘든 상황에서도 하나님께 더 가까이 가고 싶을 때 추천해.",
+    "tags": [
+      "고난",
+      "믿음",
+      "가까이"
+    ]
+  },
+  {
+    "number": 343,
+    "title": "시험 받을 때에",
+    "group": "고난·회복",
+    "reason": "유혹이나 시험 앞에서 흔들리지 않기를 구할 때 어울려.",
+    "tags": [
+      "시험",
+      "유혹",
+      "도움"
+    ]
+  },
+  {
+    "number": 344,
+    "title": "믿음으로 가리라",
+    "group": "믿음·의지",
+    "reason": "앞이 선명하지 않아도 믿음으로 한 걸음 내딛고 싶을 때 좋아.",
+    "tags": [
+      "믿음",
+      "결정",
+      "앞길"
+    ]
+  },
+  {
+    "number": 369,
+    "title": "죄짐 맡은 우리 구주",
+    "group": "걱정·평안",
+    "reason": "근심과 무거운 마음을 기도로 맡기고 싶을 때 추천해.",
+    "tags": [
+      "걱정",
+      "근심",
+      "기도",
+      "위로"
+    ]
+  },
+  {
+    "number": 370,
+    "title": "주 안에 있는 나에게",
+    "group": "걱정·평안",
+    "reason": "두려움과 걱정 속에서 평안을 되찾고 싶을 때 잘 어울려.",
+    "tags": [
+      "평안",
+      "걱정",
+      "두려움"
+    ]
+  },
+  {
+    "number": 384,
+    "title": "나의 갈 길 다 가도록",
+    "group": "인도·동행",
+    "reason": "앞길과 선택을 하나님께 맡기고 인도를 구할 때 좋아.",
+    "tags": [
+      "인도",
+      "길",
+      "선택"
+    ]
+  },
+  {
+    "number": 405,
+    "title": "주의 친절한 팔에 안기세",
+    "group": "걱정·평안",
+    "reason": "불안하거나 지친 마음에 쉼과 평안이 필요할 때 추천해.",
+    "tags": [
+      "평안",
+      "쉼",
+      "두려움"
+    ]
+  },
+  {
+    "number": 430,
+    "title": "주와 같이 길 가는 것",
+    "group": "인도·동행",
+    "reason": "하루를 하나님과 함께 걷는 마음으로 시작하고 싶을 때 좋아.",
+    "tags": [
+      "동행",
+      "하루",
+      "인도"
+    ]
+  },
+  {
+    "number": 431,
+    "title": "주 안에 기쁨 있네",
+    "group": "걱정·평안",
+    "reason": "마음이 무겁거나 기쁨과 소망을 다시 찾고 싶을 때 추천해.",
+    "tags": [
+      "기쁨",
+      "평안",
+      "소망"
+    ]
+  },
+  {
+    "number": 455,
+    "title": "주님의 마음을 본받는 자",
+    "group": "삶·성화",
+    "reason": "말과 행동에서 주님의 마음을 닮아가고 싶을 때 좋아.",
+    "tags": [
+      "성화",
+      "관계",
+      "사랑",
+      "삶"
+    ]
+  },
+  {
+    "number": 456,
+    "title": "거친 세상에서 실패하거든",
+    "group": "고난·회복",
+    "reason": "실패하거나 낙심한 날 다시 힘을 얻고 싶을 때 어울려.",
+    "tags": [
+      "실패",
+      "낙심",
+      "회복"
+    ]
+  },
+  {
+    "number": 545,
+    "title": "이 눈에 아무 증거 아니 뵈어도",
+    "group": "믿음·의지",
+    "reason": "결과가 보이지 않아도 믿음을 붙들고 기다려야 할 때 추천해.",
+    "tags": [
+      "믿음",
+      "기다림",
+      "불확실"
+    ]
+  },
+  {
+    "number": 548,
+    "title": "날 구속하신",
+    "group": "은혜·구원",
+    "reason": "구원의 은혜와 삶의 인도를 함께 고백하고 싶을 때 좋아.",
+    "tags": [
+      "구원",
+      "은혜",
+      "인도"
+    ]
+  },
+  {
+    "number": 549,
+    "title": "내 주여 뜻대로",
+    "group": "믿음·의지",
+    "reason": "내 뜻을 내려놓고 하나님의 뜻에 맡기고 싶을 때 추천해.",
+    "tags": [
+      "맡김",
+      "뜻",
+      "결정",
+      "믿음"
+    ]
+  }
+];
+const hymnGroups=['전체','걱정·평안','믿음·의지','은혜·구원','인도·동행','고난·회복','말씀','삶·성화'];
+let currentHymnGroup='전체';
+let faithResource=localStorage.getItem('faithResource')||'bible';
 
 const bibleBooks = [{"id": 1, "name": "창세기", "abbr": "창", "chapters": 50, "testament": "구약"}, {"id": 2, "name": "출애굽기", "abbr": "출", "chapters": 40, "testament": "구약"}, {"id": 3, "name": "레위기", "abbr": "레", "chapters": 27, "testament": "구약"}, {"id": 4, "name": "민수기", "abbr": "민", "chapters": 36, "testament": "구약"}, {"id": 5, "name": "신명기", "abbr": "신", "chapters": 34, "testament": "구약"}, {"id": 6, "name": "여호수아", "abbr": "수", "chapters": 24, "testament": "구약"}, {"id": 7, "name": "사사기", "abbr": "삿", "chapters": 21, "testament": "구약"}, {"id": 8, "name": "룻기", "abbr": "룻", "chapters": 4, "testament": "구약"}, {"id": 9, "name": "사무엘상", "abbr": "삼상", "chapters": 31, "testament": "구약"}, {"id": 10, "name": "사무엘하", "abbr": "삼하", "chapters": 24, "testament": "구약"}, {"id": 11, "name": "열왕기상", "abbr": "왕상", "chapters": 22, "testament": "구약"}, {"id": 12, "name": "열왕기하", "abbr": "왕하", "chapters": 25, "testament": "구약"}, {"id": 13, "name": "역대상", "abbr": "대상", "chapters": 29, "testament": "구약"}, {"id": 14, "name": "역대하", "abbr": "대하", "chapters": 36, "testament": "구약"}, {"id": 15, "name": "에스라", "abbr": "스", "chapters": 10, "testament": "구약"}, {"id": 16, "name": "느헤미야", "abbr": "느", "chapters": 13, "testament": "구약"}, {"id": 17, "name": "에스더", "abbr": "에", "chapters": 10, "testament": "구약"}, {"id": 18, "name": "욥기", "abbr": "욥", "chapters": 42, "testament": "구약"}, {"id": 19, "name": "시편", "abbr": "시", "chapters": 150, "testament": "구약"}, {"id": 20, "name": "잠언", "abbr": "잠", "chapters": 31, "testament": "구약"}, {"id": 21, "name": "전도서", "abbr": "전", "chapters": 12, "testament": "구약"}, {"id": 22, "name": "아가", "abbr": "아", "chapters": 8, "testament": "구약"}, {"id": 23, "name": "이사야", "abbr": "사", "chapters": 66, "testament": "구약"}, {"id": 24, "name": "예레미야", "abbr": "렘", "chapters": 52, "testament": "구약"}, {"id": 25, "name": "예레미야애가", "abbr": "애", "chapters": 5, "testament": "구약"}, {"id": 26, "name": "에스겔", "abbr": "겔", "chapters": 48, "testament": "구약"}, {"id": 27, "name": "다니엘", "abbr": "단", "chapters": 12, "testament": "구약"}, {"id": 28, "name": "호세아", "abbr": "호", "chapters": 14, "testament": "구약"}, {"id": 29, "name": "요엘", "abbr": "욜", "chapters": 3, "testament": "구약"}, {"id": 30, "name": "아모스", "abbr": "암", "chapters": 9, "testament": "구약"}, {"id": 31, "name": "오바댜", "abbr": "옵", "chapters": 1, "testament": "구약"}, {"id": 32, "name": "요나", "abbr": "욘", "chapters": 4, "testament": "구약"}, {"id": 33, "name": "미가", "abbr": "미", "chapters": 7, "testament": "구약"}, {"id": 34, "name": "나훔", "abbr": "나", "chapters": 3, "testament": "구약"}, {"id": 35, "name": "하박국", "abbr": "합", "chapters": 3, "testament": "구약"}, {"id": 36, "name": "스바냐", "abbr": "습", "chapters": 3, "testament": "구약"}, {"id": 37, "name": "학개", "abbr": "학", "chapters": 2, "testament": "구약"}, {"id": 38, "name": "스가랴", "abbr": "슥", "chapters": 14, "testament": "구약"}, {"id": 39, "name": "말라기", "abbr": "말", "chapters": 4, "testament": "구약"}, {"id": 40, "name": "마태복음", "abbr": "마", "chapters": 28, "testament": "신약"}, {"id": 41, "name": "마가복음", "abbr": "막", "chapters": 16, "testament": "신약"}, {"id": 42, "name": "누가복음", "abbr": "눅", "chapters": 24, "testament": "신약"}, {"id": 43, "name": "요한복음", "abbr": "요", "chapters": 21, "testament": "신약"}, {"id": 44, "name": "사도행전", "abbr": "행", "chapters": 28, "testament": "신약"}, {"id": 45, "name": "로마서", "abbr": "롬", "chapters": 16, "testament": "신약"}, {"id": 46, "name": "고린도전서", "abbr": "고전", "chapters": 16, "testament": "신약"}, {"id": 47, "name": "고린도후서", "abbr": "고후", "chapters": 13, "testament": "신약"}, {"id": 48, "name": "갈라디아서", "abbr": "갈", "chapters": 6, "testament": "신약"}, {"id": 49, "name": "에베소서", "abbr": "엡", "chapters": 6, "testament": "신약"}, {"id": 50, "name": "빌립보서", "abbr": "빌", "chapters": 4, "testament": "신약"}, {"id": 51, "name": "골로새서", "abbr": "골", "chapters": 4, "testament": "신약"}, {"id": 52, "name": "데살로니가전서", "abbr": "살전", "chapters": 5, "testament": "신약"}, {"id": 53, "name": "데살로니가후서", "abbr": "살후", "chapters": 3, "testament": "신약"}, {"id": 54, "name": "디모데전서", "abbr": "딤전", "chapters": 6, "testament": "신약"}, {"id": 55, "name": "디모데후서", "abbr": "딤후", "chapters": 4, "testament": "신약"}, {"id": 56, "name": "디도서", "abbr": "딛", "chapters": 3, "testament": "신약"}, {"id": 57, "name": "빌레몬서", "abbr": "몬", "chapters": 1, "testament": "신약"}, {"id": 58, "name": "히브리서", "abbr": "히", "chapters": 13, "testament": "신약"}, {"id": 59, "name": "야고보서", "abbr": "약", "chapters": 5, "testament": "신약"}, {"id": 60, "name": "베드로전서", "abbr": "벧전", "chapters": 5, "testament": "신약"}, {"id": 61, "name": "베드로후서", "abbr": "벧후", "chapters": 3, "testament": "신약"}, {"id": 62, "name": "요한1서", "abbr": "요일", "chapters": 5, "testament": "신약"}, {"id": 63, "name": "요한2서", "abbr": "요이", "chapters": 1, "testament": "신약"}, {"id": 64, "name": "요한3서", "abbr": "요삼", "chapters": 1, "testament": "신약"}, {"id": 65, "name": "유다서", "abbr": "유", "chapters": 1, "testament": "신약"}, {"id": 66, "name": "요한계시록", "abbr": "계", "chapters": 22, "testament": "신약"}];
 const dailyBibleRefs = [{"book": 19, "chapter": 23, "verse": 1}, {"book": 19, "chapter": 46, "verse": 1}, {"book": 19, "chapter": 121, "verse": 1}, {"book": 20, "chapter": 3, "verse": 5}, {"book": 23, "chapter": 41, "verse": 10}, {"book": 23, "chapter": 40, "verse": 31}, {"book": 24, "chapter": 29, "verse": 11}, {"book": 25, "chapter": 3, "verse": 22}, {"book": 40, "chapter": 6, "verse": 33}, {"book": 40, "chapter": 11, "verse": 28}, {"book": 43, "chapter": 14, "verse": 27}, {"book": 43, "chapter": 3, "verse": 16}, {"book": 43, "chapter": 15, "verse": 5}, {"book": 45, "chapter": 8, "verse": 28}, {"book": 45, "chapter": 12, "verse": 12}, {"book": 46, "chapter": 13, "verse": 13}, {"book": 50, "chapter": 4, "verse": 6}, {"book": 50, "chapter": 4, "verse": 13}, {"book": 51, "chapter": 3, "verse": 15}, {"book": 52, "chapter": 5, "verse": 16}, {"book": 55, "chapter": 1, "verse": 7}, {"book": 58, "chapter": 11, "verse": 1}, {"book": 59, "chapter": 1, "verse": 5}, {"book": 60, "chapter": 5, "verse": 7}, {"book": 62, "chapter": 4, "verse": 18}, {"book": 19, "chapter": 37, "verse": 5}, {"book": 19, "chapter": 55, "verse": 22}, {"book": 20, "chapter": 16, "verse": 9}, {"book": 23, "chapter": 43, "verse": 2}, {"book": 43, "chapter": 16, "verse": 33}, {"book": 45, "chapter": 15, "verse": 13}];
@@ -1962,9 +2241,48 @@ async function downloadBibleOffline(){
     localStorage.setItem('bibleOfflineSavedAt',new Date().toISOString());st.textContent=`완료 ✓ 성경 ${entries.length}장을 폰에 저장했어.`;loadBibleChapter();
   }catch(e){st.textContent='전체 저장에 실패했어. 인터넷 연결을 확인하고 다시 눌러줘.'}finally{btn.disabled=false;btn.style.opacity='1'}
 }
+function setFaithResource(which,save=true){
+  if(!['bible','hymn'].includes(which))which='bible';
+  faithResource=which;
+  if(save)localStorage.setItem('faithResource',which);
+  document.querySelectorAll('.resource-tab').forEach(b=>b.classList.toggle('active',b.dataset.resource===which));
+  const bp=document.getElementById('biblePanel'),hp=document.getElementById('hymnPanel');
+  if(bp)bp.classList.toggle('active',which==='bible');
+  if(hp)hp.classList.toggle('active',which==='hymn');
+  if(which==='hymn')renderHymns();
+}
+function getHymnFavorites(){try{return JSON.parse(localStorage.getItem('hymnFavorites')||'[]').map(Number)}catch(e){return []}}
+function setHymnGroup(group){currentHymnGroup=group;renderHymns()}
+function todayHymn(){return hymns[dailyIndex()%hymns.length]}
+function renderDailyHymn(){
+  const h=todayHymn(),fav=getHymnFavorites().includes(h.number);
+  const n=document.getElementById('dailyHymnNumber'),t=document.getElementById('dailyHymnTitle'),r=document.getElementById('dailyHymnReason'),b=document.getElementById('dailyHymnFavBtn');
+  if(n)n.textContent=`새찬송가 ${h.number}장`;if(t)t.textContent=h.title;if(r)r.textContent=h.reason;if(b)b.textContent=fav?'★ 즐겨찾기 해제':'☆ 즐겨찾기';
+}
+function toggleHymnFavorite(number){let a=getHymnFavorites();number=Number(number);a=a.includes(number)?a.filter(x=>x!==number):[number,...a];localStorage.setItem('hymnFavorites',JSON.stringify(a));renderHymns();renderDailyHymn()}
+function toggleDailyHymnFavorite(){toggleHymnFavorite(todayHymn().number)}
+function hymnOfficialUrl(number){return `https://www.hymnkorea.org/50?keyword=${encodeURIComponent(number)}&keyword_type=all`}
+function openHymnOfficial(number){window.open(hymnOfficialUrl(number),'_blank','noopener')}
+function openDailyHymnOfficial(){openHymnOfficial(todayHymn().number)}
+function hymnCard(h){
+  const fav=getHymnFavorites().includes(h.number);
+  return `<div class="hymn-card"><div class="hymn-card-head"><div><div class="hymn-card-title">${h.number}장 · ${escapeHtml(h.title)}</div><div class="hymn-meta">${escapeHtml(h.group)}</div></div><button class="verse-star ${fav?'active':''}" onclick="toggleHymnFavorite(${h.number})" aria-label="찬송 즐겨찾기">${fav?'★':'☆'}</button></div><div class="hymn-reason">${escapeHtml(h.reason)}</div><div class="hymn-actions"><button class="btn secondary" onclick="toggleHymnFavorite(${h.number})">${fav?'즐겨찾기 해제':'즐겨찾기'}</button><button class="btn ghost" onclick="openHymnOfficial(${h.number})">공식 페이지</button></div></div>`;
+}
+function renderHymns(){
+  renderDailyHymn();
+  const chips=document.getElementById('hymnChips');if(chips)chips.innerHTML=hymnGroups.map(g=>`<button class="chip ${g===currentHymnGroup?'active':''}" onclick="setHymnGroup('${g}')">${g}</button>`).join('');
+  const q=(document.getElementById('hymnSearch')?.value||'').trim().toLowerCase();
+  const match=h=>currentHymnGroup==='전체'||h.group===currentHymnGroup;
+  const search=h=>!q||`${h.number} ${h.title} ${h.group} ${h.reason} ${(h.tags||[]).join(' ')}`.toLowerCase().includes(q);
+  const favs=getHymnFavorites();const favItems=hymns.filter(h=>favs.includes(h.number)&&search(h));
+  const fw=document.getElementById('hymnFavorites');if(fw)fw.innerHTML=favItems.length?`<div class="section-title">⭐ 즐겨찾기 찬송</div>${favItems.map(hymnCard).join('')}`:'';
+  const items=hymns.filter(h=>match(h)&&search(h));const list=document.getElementById('hymnList');if(list)list.innerHTML=items.length?`<div class="section-title">찬송 ${items.length}곡</div>${items.map(hymnCard).join('')}`:'<div class="empty-state">찾는 찬송이 없어.<br>다른 단어로 검색해봐.</div>';
+}
+
 function initBibleView(){
   if(!bibleReady){initBibleSelectors();bibleReady=true}else{document.getElementById('bibleBookSelect').value=String(bibleBookId);renderBibleChapterOptions()}
   const saved=localStorage.getItem('bibleOfflineSavedAt');document.getElementById('offlineBibleStatus').textContent=saved?'✓ 전체 성경 오프라인 저장 기록이 있어.':'';
+  setFaithResource(faithResource,false);renderDailyHymn();
   renderDailyBibleWord();if(!bibleCurrentVerses.length)loadBibleChapter();
 }
 
@@ -1977,7 +2295,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=1.5');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.6');
       await reg.update();
     }catch(e){}
   });
