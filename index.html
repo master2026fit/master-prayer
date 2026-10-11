@@ -109,6 +109,20 @@
     .small{font-size:13px;color:var(--muted)}
     .top-actions{display:flex;gap:8px;margin-top:10px}
     .top-actions .btn{flex:1}
+    .training-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+    .level-btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:14px;padding:12px 6px;font-weight:800;cursor:pointer}
+    .level-btn span{display:block;font-size:22px;margin-bottom:3px}
+    .level-btn.active{background:var(--soft);border-color:var(--primary);color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+    .training-panel{display:none}.training-panel.active{display:block}
+    .level-desc{margin:10px 2px 0;font-size:13px;color:var(--muted);text-align:center}
+    .keyword-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+    .keyword-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;min-height:102px}
+    .keyword-card b{display:block;color:var(--primary);font-size:16px;margin-bottom:5px}
+    .keyword-card p{margin:0;font-size:14px;color:var(--muted);line-height:1.55}
+    .training-status{text-align:center;font-size:13px;color:var(--good);font-weight:800;min-height:22px;margin-top:6px}
+    .free-space{padding:22px 16px;border:1px dashed #cfc3d8;border-radius:18px;background:#fff;text-align:center;margin:12px 0}
+    .free-space strong{display:block;font-size:19px;margin-bottom:6px}
+    .hidden-hint{display:none;margin-top:10px}
     .prayer-browser{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 2px}
     .prayer-browser .btn{padding:9px 11px;font-size:13px;min-width:96px}
     .prayer-count{font-size:13px;color:var(--muted);font-weight:800;white-space:nowrap}
@@ -130,7 +144,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v1.3.4</div>
+    <div class="version">v1.4</div>
   </header>
 
   <main>
@@ -179,37 +193,87 @@
 
     <section id="training" class="view">
       <div class="card">
-        <div class="label">4단계 기도 훈련</div>
+        <div class="label">기도 훈련 · 단계 선택</div>
         <div class="title">읽는 기도에서 내 기도로</div>
-        <div class="progress"><div id="progressBar"></div></div>
+        <div class="training-levels">
+          <button class="level-btn" data-level="beginner" onclick="setTrainingLevel('beginner')"><span>🌱</span>초급</button>
+          <button class="level-btn" data-level="middle" onclick="setTrainingLevel('middle')"><span>🌿</span>중급</button>
+          <button class="level-btn" data-level="free" onclick="setTrainingLevel('free')"><span>🕊️</span>자유기도</button>
+        </div>
+        <div class="level-desc" id="trainingLevelDesc"></div>
+      </div>
 
-        <div class="step active" data-step="1">
-          <div class="label">1단계 · 그대로 읽기</div>
-          <div class="prayer" id="trainPrayer"></div>
-          <p class="hint">서두르지 말고 한 문장씩 천천히 읽어봐.</p>
-        </div>
-        <div class="step" data-step="2">
-          <div class="label">2단계 · 한 문장씩 따라하기</div>
-          <div class="quote" id="trainSentence"></div>
-          <p class="hint">이 문장을 소리 내거나 마음속으로 한 번 기도한 뒤 다음 문장으로 넘어가.</p>
-          <button class="btn secondary full" onclick="nextSentence()">다음 문장</button>
-        </div>
-        <div class="step" data-step="3">
-          <div class="label">3단계 · 내 말로 기도하기</div>
-          <div class="prompt" id="prompt1">오늘 하나님께 감사하고 싶은 한 가지를 말해봐.</div>
-          <div class="prompt" id="prompt2">지금 가장 걱정되는 일을 솔직하게 말씀드려봐.</div>
-          <div class="prompt" id="prompt3">오늘 만날 사람 한 명을 떠올리고 그 사람을 위해 기도해봐.</div>
-        </div>
-        <div class="step" data-step="4">
-          <div class="label">4단계 · 자유기도 1분</div>
-          <div class="timer" id="miniTimer">01:00</div>
-          <button class="btn primary full" onclick="startMiniTimer()">1분 시작</button>
-          <p class="hint">문장을 잘 만들려고 하지 않아도 돼. 지금 마음에 있는 말을 그대로 기도하면 돼.</p>
-        </div>
+      <div class="training-panel" id="beginnerTraining">
+        <div class="card">
+          <div class="label">초급 · 4단계 기도 훈련</div>
+          <div class="title">기도문을 보며 천천히 연습</div>
+          <div class="progress"><div id="progressBar"></div></div>
 
-        <div class="row" style="margin-top:16px">
-          <button class="btn ghost" onclick="prevStep()">이전</button>
-          <button class="btn primary" onclick="nextStep()" id="nextStepBtn">다음</button>
+          <div class="step active" data-step="1">
+            <div class="label">1단계 · 그대로 읽기</div>
+            <div class="prayer" id="trainPrayer"></div>
+            <p class="hint">서두르지 말고 한 문장씩 천천히 읽어봐.</p>
+          </div>
+          <div class="step" data-step="2">
+            <div class="label">2단계 · 한 문장씩 따라하기</div>
+            <div class="quote" id="trainSentence"></div>
+            <p class="hint">이 문장을 소리 내거나 마음속으로 한 번 기도한 뒤 다음 문장으로 넘어가.</p>
+            <button class="btn secondary full" onclick="nextSentence()">다음 문장</button>
+          </div>
+          <div class="step" data-step="3">
+            <div class="label">3단계 · 내 말로 기도하기</div>
+            <div class="prompt">오늘 하나님께 감사하고 싶은 한 가지를 말해봐.</div>
+            <div class="prompt">지금 가장 걱정되는 일을 솔직하게 말씀드려봐.</div>
+            <div class="prompt">오늘 떠오르는 한 사람을 위해 기도해봐.</div>
+          </div>
+          <div class="step" data-step="4">
+            <div class="label">4단계 · 자유기도 1분</div>
+            <div class="timer" id="miniTimer">01:00</div>
+            <button class="btn primary full" onclick="startMiniTimer()">1분 시작</button>
+            <p class="hint">문장을 잘 만들려고 하지 않아도 돼. 지금 마음에 있는 말을 그대로 기도하면 돼.</p>
+          </div>
+
+          <div class="row" style="margin-top:16px">
+            <button class="btn ghost" onclick="prevStep()">이전</button>
+            <button class="btn primary" onclick="nextStep()" id="nextStepBtn">다음</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="training-panel" id="middleTraining">
+        <div class="card">
+          <div class="label">중급 · 키워드로 기도하기</div>
+          <div class="title" id="midPrayerTitle">오늘의 기도</div>
+          <p class="hint">완성된 기도문은 보지 않아. 아래 네 가지 키워드만 보고 네 문장으로 이어가봐.</p>
+          <div class="keyword-grid">
+            <div class="keyword-card"><b>① 감사</b><p>오늘 감사한 것 한 가지를 직접 말해봐.</p></div>
+            <div class="keyword-card"><b>② 솔직한 마음</b><p>지금 기쁘거나 힘든 마음을 숨기지 말고 말해봐.</p></div>
+            <div class="keyword-card"><b>③ 도움·중보</b><p>내게 필요한 도움과 떠오르는 사람을 위해 기도해봐.</p></div>
+            <div class="keyword-card"><b>④ 맡김·실천</b><p>걱정을 맡기고 오늘 내가 할 한 가지를 고백해봐.</p></div>
+          </div>
+          <div class="timer" id="midTimer">02:00</div>
+          <div class="row">
+            <button class="btn primary" onclick="startMiddleTimer()">2분 시작</button>
+            <button class="btn good" onclick="completeTraining('middle')">훈련 완료 ✓</button>
+          </div>
+          <div class="training-status" id="midTimerStatus"></div>
+        </div>
+      </div>
+
+      <div class="training-panel" id="freeTraining">
+        <div class="card">
+          <div class="label">자유기도 · 힌트 없이</div>
+          <div class="title">3분 동안 내 말로 기도하기</div>
+          <div class="free-space">
+            <strong>지금 하나님께 마음을 말씀드려봐.</strong>
+            <span class="hint">잘 말하려 하지 말고, 떠오르는 말부터 시작하면 돼.</span>
+          </div>
+          <div class="timer" id="freeTimer">03:00</div>
+          <button class="btn primary full" onclick="startFreeTimer()">3분 시작</button>
+          <button class="btn ghost full" style="margin-top:9px" onclick="toggleFreeHint()">막힐 때만 힌트 보기</button>
+          <div class="prompt hidden-hint" id="freeHint">감사 → 지금 마음 → 필요한 도움 → 누군가를 위한 기도 → 오늘을 맡김</div>
+          <button class="btn good full" style="margin-top:10px" onclick="completeTraining('free')">오늘 훈련 완료 ✓</button>
+          <div class="training-status" id="freeTimerStatus"></div>
         </div>
       </div>
     </section>
@@ -1259,6 +1323,8 @@ const categories = [
 ];
 
 let trainingStep=1, sentenceIndex=0, miniInterval=null, timerInterval=null;
+let middleInterval=null, freeInterval=null;
+let trainingLevel=localStorage.getItem('trainingLevel')||'beginner';
 let calendarCursor = new Date();
 let selectedDateKey = null;
 let editingPrayerId = null;
@@ -1280,6 +1346,8 @@ function renderDaily(){
   document.getElementById('dailyPrayer').textContent=p.text;
   document.getElementById('prayerCount').textContent=`기도문 ${currentPrayerIndex+1} / ${dailyPrayers.length}`;
   document.getElementById('trainPrayer').textContent=p.text;
+  const midTitle=document.getElementById('midPrayerTitle');
+  if(midTitle) midTitle.textContent=p.title;
   sentenceIndex=0; renderSentence();
 }
 function changePrayer(delta){
@@ -1413,7 +1481,25 @@ function showView(id,btn){
 }
 function startTraining(){
   const btn=[...document.querySelectorAll('nav button')].find(b=>b.dataset.view==='training');
-  showView('training',btn); setTrainingStep(1);
+  showView('training',btn);
+  setTrainingLevel(trainingLevel,false);
+  if(trainingLevel==='beginner') setTrainingStep(1);
+}
+function setTrainingLevel(level,save=true){
+  if(!['beginner','middle','free'].includes(level)) level='beginner';
+  trainingLevel=level;
+  if(save) localStorage.setItem('trainingLevel',level);
+  document.querySelectorAll('.level-btn').forEach(b=>b.classList.toggle('active',b.dataset.level===level));
+  document.getElementById('beginnerTraining').classList.toggle('active',level==='beginner');
+  document.getElementById('middleTraining').classList.toggle('active',level==='middle');
+  document.getElementById('freeTraining').classList.toggle('active',level==='free');
+  const desc={
+    beginner:'기도문을 보며 4단계로 천천히 연습해.',
+    middle:'기도문 없이 키워드만 보고 2분 동안 네 말로 이어가.',
+    free:'도움 문장 없이 3분 동안 자유롭게 기도해.'
+  };
+  document.getElementById('trainingLevelDesc').textContent=desc[level];
+  if(level==='beginner') setTrainingStep(trainingStep||1);
 }
 function setTrainingStep(n){
   trainingStep=Math.max(1,Math.min(4,n));
@@ -1423,7 +1509,7 @@ function setTrainingStep(n){
 }
 function nextStep(){
   if(trainingStep<4) setTrainingStep(trainingStep+1);
-  else {markTodayDone(); const btn=[...document.querySelectorAll('nav button')].find(b=>b.dataset.view==='home'); showView('home',btn);}
+  else completeTraining('beginner');
 }
 function prevStep(){if(trainingStep>1)setTrainingStep(trainingStep-1)}
 function renderSentence(){
@@ -1443,6 +1529,29 @@ function startMiniTimer(){
   const el=document.getElementById('miniTimer'); el.textContent='01:00';
   miniInterval=setInterval(()=>{sec--;el.textContent=`00:${pad(sec)}`; if(sec<=0){clearInterval(miniInterval);el.textContent='완료 ✓';}},1000);
 }
+function startMiddleTimer(){
+  clearInterval(middleInterval); let sec=120;
+  const el=document.getElementById('midTimer'),status=document.getElementById('midTimerStatus');
+  el.textContent='02:00'; status.textContent='';
+  middleInterval=setInterval(()=>{sec--;const m=Math.floor(sec/60),ss=sec%60;el.textContent=`${pad(m)}:${pad(ss)}`;if(sec<=0){clearInterval(middleInterval);el.textContent='완료 ✓';markTodayDone(false);status.textContent='2분 중급 훈련 완료 ✓';}},1000);
+}
+function startFreeTimer(){
+  clearInterval(freeInterval); let sec=180;
+  const el=document.getElementById('freeTimer'),status=document.getElementById('freeTimerStatus');
+  el.textContent='03:00'; status.textContent='';
+  freeInterval=setInterval(()=>{sec--;const m=Math.floor(sec/60),ss=sec%60;el.textContent=`${pad(m)}:${pad(ss)}`;if(sec<=0){clearInterval(freeInterval);el.textContent='완료 ✓';markTodayDone(false);status.textContent='3분 자유기도 완료 ✓';}},1000);
+}
+function toggleFreeHint(){
+  const el=document.getElementById('freeHint');
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+function completeTraining(level){
+  markTodayDone(false);
+  const names={beginner:'초급 4단계',middle:'중급 키워드',free:'자유기도'};
+  document.getElementById('modalTitle').textContent='오늘 훈련 완료 ✓';
+  document.getElementById('modalBody').innerHTML=`<div class="quote">${names[level]||'기도'} 훈련을 마쳤어.<br>조금씩 도움 문장을 줄여가면서 내 말로 기도하는 힘을 키워가면 돼.</div>`;
+  document.getElementById('modal').classList.add('show');
+}
 function openTimer(minutes){
   clearInterval(timerInterval); let sec=minutes*60;
   document.getElementById('modalTitle').textContent=`🙏 ${minutes}분 자유기도`;
@@ -1456,7 +1565,8 @@ function getData(){
     prayers:JSON.parse(localStorage.getItem('myPrayers')||'[]'),
     requests:JSON.parse(localStorage.getItem('prayerRequests')||'[]'),
     situationFavorites:JSON.parse(localStorage.getItem('situationFavorites')||'[]'),
-    situationPrayerFavorites:JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]')
+    situationPrayerFavorites:JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]'),
+    trainingLevel:localStorage.getItem('trainingLevel')||'beginner'
   };
 }
 function markTodayDone(show=true){
@@ -1685,11 +1795,11 @@ function exportBackup(){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`today-prayer-backup-${localDateKey()}.json`;a.click();URL.revokeObjectURL(a.href)
 }
 function importBackup(ev){
-  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
+  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));if(['beginner','middle','free'].includes(d.trainingLevel))localStorage.setItem('trainingLevel',d.trainingLevel);renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
 }
 
 document.getElementById('todayLabel').textContent=formatToday();
-renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();
+renderDaily();renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();setTrainingLevel(trainingLevel,false);
 // 터치 후 버튼 잔상(포커스/탭 하이라이트) 제거
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTimeout(()=>b.blur(),0)});
 
@@ -1697,7 +1807,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=1.3.4');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.4');
       await reg.update();
     }catch(e){}
   });
