@@ -1,4 +1,4 @@
-const CACHE='today-prayer-v1-6';
+const CACHE='today-prayer-v1-6-1';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',e=>{
