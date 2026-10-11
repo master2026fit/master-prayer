@@ -48,6 +48,8 @@
     .tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;text-align:left;cursor:pointer;min-height:92px}
     .tile strong{display:block;font-size:16px;margin-top:5px}
     .tile span{font-size:24px}
+    .tile .tile-note{display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:700}
+    .situation-prayer-title{font-size:18px;font-weight:900;margin:6px 0 10px}
     .situation-tools{margin:8px 0 12px}
     .situation-search{position:relative}
     .situation-search input{padding-left:40px;background:#fff}
@@ -128,7 +130,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v1.3.3</div>
+    <div class="version">v1.3.4</div>
   </header>
 
   <main>
@@ -163,13 +165,13 @@
     </section>
 
     <section id="situations" class="view">
-      <div class="section-title">상황별 기도 <span class="small">30개</span></div>
+      <div class="section-title">상황별 기도 <span class="small">30개 상황 · 90개 기도문</span></div>
       <div class="card situation-tools">
         <div class="situation-search">
           <input id="situationSearch" type="search" placeholder="지금 필요한 기도를 찾아봐" oninput="renderSituations()" />
         </div>
         <div class="chips" id="situationChips"></div>
-        <div class="favorite-note">⭐ 마음에 드는 기도는 열어서 즐겨찾기에 담을 수 있어.</div>
+        <div class="favorite-note">각 상황마다 기도문이 3개 있어. ⭐ 마음에 드는 기도문은 따로 즐겨찾기할 수 있어.</div>
       </div>
       <div id="favoriteSituations"></div>
       <div id="allCategories"></div>
@@ -654,36 +656,606 @@ const dailyPrayers = [
 ];
 
 const categories = [
-  {"group": "하루생활", "icon": "🌅", "name": "아침", "text": "하나님, 새로운 하루를 허락해주셔서 감사합니다. 오늘 제 생각과 말과 행동을 지켜주시고, 해야 할 일을 성실히 감당하게 해주세요. 작은 일에도 감사하며 주님과 함께 걷는 하루가 되게 해주세요. 아멘."},
-  {"group": "하루생활", "icon": "🍚", "name": "식사", "text": "하나님, 오늘도 먹을 것을 주셔서 감사합니다. 이 음식을 통해 필요한 힘을 얻게 하시고, 준비한 손길과 함께하는 사람들을 기억하게 해주세요. 받은 것을 감사히 누리고 나눌 줄도 알게 해주세요. 아멘."},
-  {"group": "하루생활", "icon": "💼", "name": "출근·일 시작", "text": "하나님, 오늘 맡겨진 일을 시작합니다. 조급함보다 차분함을 주시고, 해야 할 일을 정직하고 성실하게 감당하게 해주세요. 사람을 존중하고 결과보다 바른 과정을 선택하게 해주세요. 아멘."},
-  {"group": "하루생활", "icon": "🚗", "name": "운전 전", "text": "하나님, 이동하는 길을 안전하게 지켜주세요. 서두르거나 감정적으로 운전하지 않게 하시고, 주변을 잘 살피며 양보할 줄 알게 해주세요. 출발부터 도착까지 평안하게 인도해주세요. 아멘."},
-  {"group": "하루생활", "icon": "🏃", "name": "운동 전후", "text": "하나님, 제 몸을 움직일 수 있음에 감사합니다. 무리하지 않고 제 상태에 맞게 운동하며, 몸을 건강하게 돌볼 지혜를 주세요. 운동을 마친 뒤에도 감사하며 잘 회복하게 해주세요. 아멘."},
-  {"group": "하루생활", "icon": "🌙", "name": "잠들기 전", "text": "하나님, 오늘 하루도 지켜주셔서 감사합니다. 잘한 일은 감사하고 부족했던 일은 돌아봅니다. 마음에 남은 걱정은 주님께 맡기고 편안히 쉬게 해주세요. 내일을 새 마음으로 맞게 해주세요. 아멘."},
-  {"group": "마음·감정", "icon": "😔", "name": "힘들 때", "text": "하나님, 지금 제 마음이 힘들고 지쳐 있습니다. 제 마음을 아시는 주님께 있는 그대로 내려놓습니다. 견딜 힘과 필요한 도움을 주시고, 오늘 한 걸음만큼은 다시 걸어갈 수 있게 붙들어주세요. 아멘."},
-  {"group": "마음·감정", "icon": "🌧️", "name": "걱정될 때", "text": "하나님, 머릿속을 떠나지 않는 걱정을 주님께 맡깁니다. 제가 할 수 있는 일과 할 수 없는 일을 분별하게 하시고, 아직 일어나지 않은 일을 미리 두려워하지 않게 해주세요. 제 마음에 평안을 주세요. 아멘."},
-  {"group": "마음·감정", "icon": "🔥", "name": "화가 날 때", "text": "하나님, 지금 올라오는 화를 그대로 말과 행동으로 옮기지 않게 해주세요. 무엇이 저를 아프게 했는지 차분히 보게 하시고, 해야 할 말은 사랑으로 하고 멈춰야 할 말은 멈추게 해주세요. 아멘."},
-  {"group": "마음·감정", "icon": "🫥", "name": "외로울 때", "text": "하나님, 혼자라고 느껴지는 제 마음을 아시니 가까이해 주세요. 사람의 반응만으로 제 가치를 판단하지 않게 하시고, 마음을 나눌 사람을 만나게 해주세요. 저도 누군가에게 따뜻한 사람이 되게 해주세요. 아멘."},
-  {"group": "마음·감정", "icon": "😨", "name": "두려울 때", "text": "하나님, 두려움 때문에 해야 할 일을 피하지 않게 해주세요. 위험은 지혜롭게 살피되 막연한 공포에 끌려가지 않게 하시고, 지금 할 수 있는 작은 행동부터 시작할 용기를 주세요. 아멘."},
-  {"group": "마음·감정", "icon": "🌱", "name": "낙심할 때", "text": "하나님, 기대한 결과가 보이지 않아 마음이 꺾일 때 저를 붙들어주세요. 지금까지 걸어온 길과 작은 변화를 보게 하시고, 쉬어야 할 때는 쉬되 포기하지 않게 해주세요. 다시 시작할 소망을 주세요. 아멘."},
-  {"group": "가족·관계", "icon": "👨‍👩‍👧‍👦", "name": "가족", "text": "하나님, 제 가족 한 사람 한 사람을 지켜주세요. 건강과 평안을 주시고 서로 이해하고 격려하게 해주세요. 익숙함 때문에 소홀히 하지 않고 감사와 사랑을 말과 행동으로 표현하게 해주세요. 아멘."},
-  {"group": "가족·관계", "icon": "💑", "name": "배우자", "text": "하나님, 제 배우자를 귀하게 여기게 해주세요. 내 생각만 옳다고 주장하기보다 먼저 듣고 이해하게 하시고, 작은 수고에도 감사하게 해주세요. 서로에게 가장 편안하고 든든한 사람이 되게 해주세요. 아멘."},
-  {"group": "가족·관계", "icon": "🧒", "name": "자녀", "text": "하나님, 자녀의 앞길을 지켜주시고 건강한 마음과 바른 판단을 주세요. 제가 지나치게 통제하기보다 믿고 기다릴 줄 알게 하시고, 말보다 삶으로 좋은 본을 보이게 해주세요. 아멘."},
-  {"group": "가족·관계", "icon": "👵", "name": "부모님", "text": "하나님, 부모님의 건강과 마음을 지켜주세요. 그동안 받은 사랑과 수고를 잊지 않고 감사하게 하시며, 필요한 때 곁을 지키고 따뜻한 말과 행동으로 마음을 전하게 해주세요. 아멘."},
-  {"group": "가족·관계", "icon": "🤝", "name": "친구·지인", "text": "하나님, 제 곁에 있는 사람들을 소중히 여기게 해주세요. 필요할 때 먼저 연락하고 기쁠 때 함께 기뻐하며 어려울 때 외면하지 않게 해주세요. 좋은 관계를 오래 지켜갈 지혜를 주세요. 아멘."},
-  {"group": "가족·관계", "icon": "🕊️", "name": "갈등이 있을 때", "text": "하나님, 관계가 불편해진 상황에서 감정만 앞세우지 않게 해주세요. 제 잘못이 있다면 인정하고 사과하게 하시고, 상대의 입장도 들을 수 있게 해주세요. 이기기보다 평화를 만드는 길을 찾게 해주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "❤️‍🩹", "name": "건강", "text": "하나님, 제 몸과 마음을 돌볼 지혜를 주세요. 몸의 신호를 무시하지 않고 필요한 검사와 치료, 쉼을 잘 선택하게 해주세요. 건강을 당연히 여기지 않고 오늘 할 수 있는 일을 감사히 감당하게 해주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "💰", "name": "재정", "text": "하나님, 제게 맡겨진 돈을 지혜롭게 관리하게 해주세요. 필요와 욕심을 구별하고 충동보다 계획을 따르게 하시며, 정직하게 벌고 감사히 사용하고 나눌 줄 알게 해주세요. 재정 때문에 마음이 지배되지 않게 해주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "🧭", "name": "중요한 결정", "text": "하나님, 중요한 선택 앞에서 감정과 욕심에 끌려가지 않게 해주세요. 필요한 정보를 잘 살피고 조언을 들을 겸손을 주시며, 오래 보아도 후회하지 않을 길을 선택할 지혜와 용기를 주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "🧪", "name": "검사 결과 기다릴 때", "text": "하나님, 결과를 기다리는 동안 불안에 휩쓸리지 않게 해주세요. 아직 알 수 없는 일을 미리 단정하지 않게 하시고, 어떤 결과가 나오더라도 필요한 도움과 판단을 잘 받을 수 있도록 인도해주세요. 기다리는 시간에 평안을 주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "🧱", "name": "실패했을 때", "text": "하나님, 실패 때문에 제 자신까지 부정하지 않게 해주세요. 무엇이 부족했는지 정직하게 배우고, 고칠 것은 고치며 다시 시작할 힘을 주세요. 한 번의 결과가 제 삶 전체를 결정하지 않음을 기억하게 해주세요. 아멘."},
-  {"group": "삶의 문제", "icon": "🚪", "name": "새로운 시작", "text": "하나님, 새로운 일을 시작하는 제 마음을 붙들어주세요. 처음부터 완벽하려 하지 않고 한 걸음씩 배우게 하시며, 두려움 때문에 시도조차 포기하지 않게 해주세요. 좋은 길이라면 담대히 나아가게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "💛", "name": "감사", "text": "하나님, 이미 제게 주신 것들을 다시 바라봅니다. 평범한 하루와 사람들, 먹고 쉬고 움직일 수 있는 일상까지 감사하게 해주세요. 없는 것보다 받은 은혜를 먼저 보고 오늘 감사 한 가지를 꼭 표현하게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "🙇", "name": "회개", "text": "하나님, 제 잘못과 부족함을 숨기지 않고 돌아봅니다. 변명보다 인정하게 하시고, 상처 준 사람이 있다면 바로잡을 용기를 주세요. 같은 실수를 반복하지 않도록 마음과 행동을 새롭게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "🕯️", "name": "믿음이 흔들릴 때", "text": "하나님, 마음에 의심과 흔들림이 있을 때 억지로 감추지 않고 주님께 솔직히 말씀드립니다. 이해되지 않는 상황 속에서도 성급히 포기하지 않게 하시고, 작은 믿음이라도 붙들고 오늘을 살아가게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "📖", "name": "말씀 읽기 전", "text": "하나님, 말씀을 읽기 전에 제 마음을 조용히 합니다. 많이 읽는 것보다 한 말씀이라도 제대로 듣고 이해하게 하시며, 제 삶에 필요한 깨달음을 주시고 오늘 실천할 한 가지를 발견하게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "⛪", "name": "예배 전", "text": "하나님, 예배의 자리로 나아갑니다. 몸만 참석하는 것이 아니라 마음도 주님께 향하게 하시고, 분주한 생각을 내려놓게 해주세요. 말씀을 귀 기울여 듣고 감사와 진실한 마음으로 예배드리게 해주세요. 아멘."},
-  {"group": "신앙생활", "icon": "🙏", "name": "중보기도", "text": "하나님, 지금 제 마음에 떠오르는 사람을 위해 기도합니다. 그 사람의 형편과 필요를 아시니 필요한 힘과 도움을 주세요. 제가 할 수 있는 일이 있다면 외면하지 않게 하시고, 그 삶에 평안과 좋은 길을 열어주세요. 아멘."}
+  {
+    "group": "하루생활",
+    "icon": "🌅",
+    "name": "아침",
+    "text": "하나님, 새로운 하루를 허락해주셔서 감사합니다. 오늘 제 생각과 말과 행동을 지켜주시고, 해야 할 일을 성실히 감당하게 해주세요. 작은 일에도 감사하며 주님과 함께 걷는 하루가 되게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "하루를 맡기며",
+        "text": "하나님, 새로운 하루를 허락해주셔서 감사합니다. 오늘 제 생각과 말과 행동을 지켜주시고, 해야 할 일을 성실히 감당하게 해주세요. 작은 일에도 감사하며 주님과 함께 걷는 하루가 되게 해주세요. 아멘."
+      },
+      {
+        "title": "바쁜 아침의 기도",
+        "text": "하나님, 아침부터 해야 할 일이 많아 마음이 급해집니다. 중요한 것부터 차분히 하게 하시고, 바쁨 때문에 가족이나 사람들에게 거친 말을 하지 않게 해주세요. 오늘 제 속도보다 주님의 평안을 먼저 붙들게 해주세요. 아멘."
+      },
+      {
+        "title": "새 마음으로 시작하는 기도",
+        "text": "하나님, 어제의 실수와 걱정을 오늘까지 끌고 오지 않게 해주세요. 새로운 하루를 다시 시작할 기회를 주심에 감사하며, 오늘 만나는 사람과 해야 할 일에 성실하게 해주세요. 작은 기쁨도 놓치지 않게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "하루생활",
+    "icon": "🍚",
+    "name": "식사",
+    "text": "하나님, 오늘도 먹을 것을 주셔서 감사합니다. 이 음식을 통해 필요한 힘을 얻게 하시고, 준비한 손길과 함께하는 사람들을 기억하게 해주세요. 받은 것을 감사히 누리고 나눌 줄도 알게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "감사하며 먹기",
+        "text": "하나님, 오늘도 먹을 것을 주셔서 감사합니다. 이 음식을 통해 필요한 힘을 얻게 하시고, 준비한 손길과 함께하는 사람들을 기억하게 해주세요. 받은 것을 감사히 누리고 나눌 줄도 알게 해주세요. 아멘."
+      },
+      {
+        "title": "혼자 먹을 때의 기도",
+        "text": "하나님, 혼자 먹는 이 시간에도 감사하는 마음을 잃지 않게 해주세요. 이 음식을 허락하신 손길과 오늘 제게 필요한 힘을 주심을 기억하게 해주세요. 외로운 마음이 있다면 평안으로 채워주세요. 아멘."
+      },
+      {
+        "title": "함께 먹을 때의 기도",
+        "text": "하나님, 함께 식사할 사람들을 주셔서 감사합니다. 음식뿐 아니라 서로의 이야기도 귀하게 듣게 하시고, 이 시간이 사랑과 감사가 오가는 시간이 되게 해주세요. 필요한 이들을 기억하며 나눌 마음도 주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "하루생활",
+    "icon": "💼",
+    "name": "출근·일 시작",
+    "text": "하나님, 오늘 맡겨진 일을 시작합니다. 조급함보다 차분함을 주시고, 해야 할 일을 정직하고 성실하게 감당하게 해주세요. 사람을 존중하고 결과보다 바른 과정을 선택하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "맡겨진 일을 시작하며",
+        "text": "하나님, 오늘 맡겨진 일을 시작합니다. 조급함보다 차분함을 주시고, 해야 할 일을 정직하고 성실하게 감당하게 해주세요. 사람을 존중하고 결과보다 바른 과정을 선택하게 해주세요. 아멘."
+      },
+      {
+        "title": "일이 버거운 날의 기도",
+        "text": "하나님, 오늘 해야 할 일이 버겁게 느껴집니다. 모든 것을 한꺼번에 해결하려 하지 않고 우선순위를 정해 하나씩 해나가게 해주세요. 실수는 줄이고 필요한 도움은 겸손히 구하게 해주세요. 아멘."
+      },
+      {
+        "title": "사람과 함께 일할 때의 기도",
+        "text": "하나님, 일보다 관계 때문에 마음이 흔들리지 않게 해주세요. 다른 사람의 수고를 인정하고 제 역할은 책임 있게 감당하게 하시며, 갈등이 생기면 감정보다 지혜롭게 대화하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "하루생활",
+    "icon": "🚗",
+    "name": "운전 전",
+    "text": "하나님, 이동하는 길을 안전하게 지켜주세요. 서두르거나 감정적으로 운전하지 않게 하시고, 주변을 잘 살피며 양보할 줄 알게 해주세요. 출발부터 도착까지 평안하게 인도해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "안전한 길을 위해",
+        "text": "하나님, 이동하는 길을 안전하게 지켜주세요. 서두르거나 감정적으로 운전하지 않게 하시고, 주변을 잘 살피며 양보할 줄 알게 해주세요. 출발부터 도착까지 평안하게 인도해주세요. 아멘."
+      },
+      {
+        "title": "복잡한 길에서의 기도",
+        "text": "하나님, 차가 많고 마음이 급해지는 길에서도 안전을 먼저 생각하게 해주세요. 끼어들기와 실수에 쉽게 화내지 않고 양보와 인내를 선택하게 해주세요. 저와 다른 운전자 모두를 지켜주세요. 아멘."
+      },
+      {
+        "title": "먼 길을 떠날 때의 기도",
+        "text": "하나님, 긴 이동을 시작합니다. 졸음과 방심을 멀리하게 하시고 필요할 때는 쉬어가게 해주세요. 가는 길과 돌아오는 길을 안전하게 지키시고 함께하는 사람들과 평안한 시간이 되게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "하루생활",
+    "icon": "🏃",
+    "name": "운동 전후",
+    "text": "하나님, 제 몸을 움직일 수 있음에 감사합니다. 무리하지 않고 제 상태에 맞게 운동하며, 몸을 건강하게 돌볼 지혜를 주세요. 운동을 마친 뒤에도 감사하며 잘 회복하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "몸을 돌보며",
+        "text": "하나님, 제 몸을 움직일 수 있음에 감사합니다. 무리하지 않고 제 상태에 맞게 운동하며, 몸을 건강하게 돌볼 지혜를 주세요. 운동을 마친 뒤에도 감사하며 잘 회복하게 해주세요. 아멘."
+      },
+      {
+        "title": "운동을 시작하며",
+        "text": "하나님, 오늘도 몸을 움직일 수 있음에 감사합니다. 욕심 때문에 무리하지 않고 정확하게 운동하게 하시며, 남과 비교하기보다 제 몸의 변화에 집중하게 해주세요. 건강을 오래 지킬 수 있는 습관을 주세요. 아멘."
+      },
+      {
+        "title": "운동을 마치며",
+        "text": "하나님, 운동을 마칠 수 있게 해주셔서 감사합니다. 몸의 피로를 잘 회복하고 필요한 영양과 휴식을 챙기게 해주세요. 오늘의 작은 수고가 건강한 삶으로 이어지게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "하루생활",
+    "icon": "🌙",
+    "name": "잠들기 전",
+    "text": "하나님, 오늘 하루도 지켜주셔서 감사합니다. 잘한 일은 감사하고 부족했던 일은 돌아봅니다. 마음에 남은 걱정은 주님께 맡기고 편안히 쉬게 해주세요. 내일을 새 마음으로 맞게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "하루를 내려놓으며",
+        "text": "하나님, 오늘 하루도 지켜주셔서 감사합니다. 잘한 일은 감사하고 부족했던 일은 돌아봅니다. 마음에 남은 걱정은 주님께 맡기고 편안히 쉬게 해주세요. 내일을 새 마음으로 맞게 해주세요. 아멘."
+      },
+      {
+        "title": "걱정이 남은 밤의 기도",
+        "text": "하나님, 잠자리에 누웠지만 마음속 걱정이 계속 떠오릅니다. 지금 해결할 수 없는 일은 잠시 내려놓고 몸과 마음이 쉬게 해주세요. 내일 필요한 지혜와 힘을 다시 주실 것을 믿게 해주세요. 아멘."
+      },
+      {
+        "title": "감사로 하루를 마치는 기도",
+        "text": "하나님, 오늘 하루의 작은 감사들을 떠올립니다. 무사히 지나온 시간과 만난 사람, 먹고 쉬고 움직일 수 있었던 것을 감사합니다. 부족했던 것은 배우게 하시고 평안히 잠들게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "😔",
+    "name": "힘들 때",
+    "text": "하나님, 지금 제 마음이 힘들고 지쳐 있습니다. 제 마음을 아시는 주님께 있는 그대로 내려놓습니다. 견딜 힘과 필요한 도움을 주시고, 오늘 한 걸음만큼은 다시 걸어갈 수 있게 붙들어주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "지친 마음을 맡기며",
+        "text": "하나님, 지금 제 마음이 힘들고 지쳐 있습니다. 제 마음을 아시는 주님께 있는 그대로 내려놓습니다. 견딜 힘과 필요한 도움을 주시고, 오늘 한 걸음만큼은 다시 걸어갈 수 있게 붙들어주세요. 아멘."
+      },
+      {
+        "title": "아무것도 하기 싫을 때",
+        "text": "하나님, 지금은 아무것도 하고 싶지 않을 만큼 지쳤습니다. 제 마음을 억지로 강하게 만들기보다 필요한 쉼을 허락하게 해주세요. 오늘 꼭 해야 할 한 가지만 감당할 힘을 주시고 나머지는 내려놓게 해주세요. 아멘."
+      },
+      {
+        "title": "버티기 어려운 날의 기도",
+        "text": "하나님, 오늘을 버티는 것조차 힘겹게 느껴집니다. 제가 혼자가 아니라는 것을 기억하게 하시고, 필요한 사람과 도움을 만나게 해주세요. 지금 이 시간을 지나갈 수 있도록 제 마음을 붙들어주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "🌧️",
+    "name": "걱정될 때",
+    "text": "하나님, 머릿속을 떠나지 않는 걱정을 주님께 맡깁니다. 제가 할 수 있는 일과 할 수 없는 일을 분별하게 하시고, 아직 일어나지 않은 일을 미리 두려워하지 않게 해주세요. 제 마음에 평안을 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "걱정을 내려놓으며",
+        "text": "하나님, 머릿속을 떠나지 않는 걱정을 주님께 맡깁니다. 제가 할 수 있는 일과 할 수 없는 일을 분별하게 하시고, 아직 일어나지 않은 일을 미리 두려워하지 않게 해주세요. 제 마음에 평안을 주세요. 아멘."
+      },
+      {
+        "title": "앞일이 불안할 때",
+        "text": "하나님, 아직 일어나지 않은 일을 머릿속에서 반복하며 두려워하고 있습니다. 사실과 상상을 구별하게 하시고, 오늘 제가 할 수 있는 준비에 집중하게 해주세요. 나머지는 주님께 맡기고 평안을 선택하게 해주세요. 아멘."
+      },
+      {
+        "title": "가족 때문에 걱정될 때",
+        "text": "하나님, 사랑하는 사람의 일 때문에 제 마음이 무겁습니다. 제가 대신 해결할 수 없는 것까지 붙들지 않게 하시고, 필요한 때 도울 지혜와 기다릴 인내를 주세요. 그 사람의 길도 지켜주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "🔥",
+    "name": "화가 날 때",
+    "text": "하나님, 지금 올라오는 화를 그대로 말과 행동으로 옮기지 않게 해주세요. 무엇이 저를 아프게 했는지 차분히 보게 하시고, 해야 할 말은 사랑으로 하고 멈춰야 할 말은 멈추게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "감정을 다스리며",
+        "text": "하나님, 지금 올라오는 화를 그대로 말과 행동으로 옮기지 않게 해주세요. 무엇이 저를 아프게 했는지 차분히 보게 하시고, 해야 할 말은 사랑으로 하고 멈춰야 할 말은 멈추게 해주세요. 아멘."
+      },
+      {
+        "title": "말하기 전에 멈추는 기도",
+        "text": "하나님, 지금 감정이 뜨겁습니다. 바로 말하거나 메시지를 보내기 전에 잠시 멈추게 해주세요. 제 마음의 상처를 정직하게 보되 상대를 상처 입히지 않는 방식으로 표현하게 해주세요. 아멘."
+      },
+      {
+        "title": "서운함이 쌓였을 때",
+        "text": "하나님, 오래 쌓인 서운함 때문에 작은 일에도 화가 납니다. 무엇이 진짜 문제인지 분별하게 하시고, 과거의 감정까지 한꺼번에 쏟아내지 않게 해주세요. 필요한 대화를 차분히 시작할 용기를 주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "🫥",
+    "name": "외로울 때",
+    "text": "하나님, 혼자라고 느껴지는 제 마음을 아시니 가까이해 주세요. 사람의 반응만으로 제 가치를 판단하지 않게 하시고, 마음을 나눌 사람을 만나게 해주세요. 저도 누군가에게 따뜻한 사람이 되게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "혼자라고 느껴질 때",
+        "text": "하나님, 혼자라고 느껴지는 제 마음을 아시니 가까이해 주세요. 사람의 반응만으로 제 가치를 판단하지 않게 하시고, 마음을 나눌 사람을 만나게 해주세요. 저도 누군가에게 따뜻한 사람이 되게 해주세요. 아멘."
+      },
+      {
+        "title": "사람이 그리운 날의 기도",
+        "text": "하나님, 누군가와 마음을 나누고 싶은데 혼자인 것처럼 느껴집니다. 제 외로움을 숨기지 않고 건강하게 표현하게 하시고, 먼저 안부를 전할 용기도 주세요. 따뜻한 관계의 길을 열어주세요. 아멘."
+      },
+      {
+        "title": "혼자 있는 시간을 위한 기도",
+        "text": "하나님, 혼자 있는 시간을 두려움으로만 채우지 않게 해주세요. 제 마음을 돌아보고 쉬며 주님과 대화하는 시간이 되게 해주세요. 외로움 속에서도 감사와 평안을 발견하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "😨",
+    "name": "두려울 때",
+    "text": "하나님, 두려움 때문에 해야 할 일을 피하지 않게 해주세요. 위험은 지혜롭게 살피되 막연한 공포에 끌려가지 않게 하시고, 지금 할 수 있는 작은 행동부터 시작할 용기를 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "용기를 구하며",
+        "text": "하나님, 두려움 때문에 해야 할 일을 피하지 않게 해주세요. 위험은 지혜롭게 살피되 막연한 공포에 끌려가지 않게 하시고, 지금 할 수 있는 작은 행동부터 시작할 용기를 주세요. 아멘."
+      },
+      {
+        "title": "결과가 두려울 때",
+        "text": "하나님, 어떤 결과가 나올지 몰라 마음이 흔들립니다. 최악의 상황만 상상하지 않게 하시고, 결과가 무엇이든 필요한 다음 걸음을 찾을 수 있다는 믿음을 주세요. 오늘 해야 할 일을 담대히 하게 해주세요. 아멘."
+      },
+      {
+        "title": "새로운 일을 앞두고",
+        "text": "하나님, 익숙하지 않은 일을 앞두니 두렵습니다. 완벽해야 한다는 부담을 내려놓고 배우는 마음으로 시작하게 해주세요. 실수해도 다시 고칠 수 있음을 기억하며 한 걸음 내딛게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "마음·감정",
+    "icon": "🌱",
+    "name": "낙심할 때",
+    "text": "하나님, 기대한 결과가 보이지 않아 마음이 꺾일 때 저를 붙들어주세요. 지금까지 걸어온 길과 작은 변화를 보게 하시고, 쉬어야 할 때는 쉬되 포기하지 않게 해주세요. 다시 시작할 소망을 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "다시 일어설 힘을 구하며",
+        "text": "하나님, 기대한 결과가 보이지 않아 마음이 꺾일 때 저를 붙들어주세요. 지금까지 걸어온 길과 작은 변화를 보게 하시고, 쉬어야 할 때는 쉬되 포기하지 않게 해주세요. 다시 시작할 소망을 주세요. 아멘."
+      },
+      {
+        "title": "노력해도 변화가 없을 때",
+        "text": "하나님, 애써도 결과가 보이지 않아 마음이 꺾입니다. 눈에 띄지 않는 작은 변화도 보게 하시고, 필요한 방향 수정은 겸손히 하게 해주세요. 포기와 휴식을 구별할 지혜를 주세요. 아멘."
+      },
+      {
+        "title": "비교 때문에 낙심할 때",
+        "text": "하나님, 다른 사람의 속도와 성과를 보며 제 삶이 초라하게 느껴집니다. 제게 주어진 길과 시간을 존중하게 하시고, 비교 대신 오늘의 한 걸음에 집중하게 해주세요. 감사와 소망을 회복시켜주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "👨‍👩‍👧‍👦",
+    "name": "가족",
+    "text": "하나님, 제 가족 한 사람 한 사람을 지켜주세요. 건강과 평안을 주시고 서로 이해하고 격려하게 해주세요. 익숙함 때문에 소홀히 하지 않고 감사와 사랑을 말과 행동으로 표현하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "가족 모두를 위해",
+        "text": "하나님, 제 가족 한 사람 한 사람을 지켜주세요. 건강과 평안을 주시고 서로 이해하고 격려하게 해주세요. 익숙함 때문에 소홀히 하지 않고 감사와 사랑을 말과 행동으로 표현하게 해주세요. 아멘."
+      },
+      {
+        "title": "가정의 평안을 위한 기도",
+        "text": "하나님, 우리 가족이 서로에게 가장 편안한 사람이 되게 해주세요. 익숙하다는 이유로 함부로 말하지 않고, 각자의 수고를 알아보며 자주 감사하게 해주세요. 집 안에 웃음과 평안을 더해주세요. 아멘."
+      },
+      {
+        "title": "가족이 어려움을 겪을 때",
+        "text": "하나님, 가족 가운데 힘든 일을 겪는 사람이 있습니다. 필요한 도움과 좋은 길을 열어주시고, 우리가 서로 탓하기보다 힘이 되어주게 해주세요. 함께 견디고 더 깊이 사랑하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "💑",
+    "name": "배우자",
+    "text": "하나님, 제 배우자를 귀하게 여기게 해주세요. 내 생각만 옳다고 주장하기보다 먼저 듣고 이해하게 하시고, 작은 수고에도 감사하게 해주세요. 서로에게 가장 편안하고 든든한 사람이 되게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "배우자를 위해",
+        "text": "하나님, 제 배우자를 귀하게 여기게 해주세요. 내 생각만 옳다고 주장하기보다 먼저 듣고 이해하게 하시고, 작은 수고에도 감사하게 해주세요. 서로에게 가장 편안하고 든든한 사람이 되게 해주세요. 아멘."
+      },
+      {
+        "title": "서로 이해하기 위한 기도",
+        "text": "하나님, 배우자의 생각과 감정을 제 기준으로만 판단하지 않게 해주세요. 말을 끝까지 듣고 작은 차이를 틀림으로 여기지 않게 하시며, 먼저 이해하려는 마음을 주세요. 아멘."
+      },
+      {
+        "title": "부부의 사랑을 지키는 기도",
+        "text": "하나님, 오래 함께할수록 사랑을 당연하게 여기지 않게 해주세요. 고맙다는 말과 따뜻한 표현을 아끼지 않고, 힘든 때 서로의 편이 되어주게 해주세요. 신뢰와 사랑이 더 깊어지게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "🧒",
+    "name": "자녀",
+    "text": "하나님, 자녀의 앞길을 지켜주시고 건강한 마음과 바른 판단을 주세요. 제가 지나치게 통제하기보다 믿고 기다릴 줄 알게 하시고, 말보다 삶으로 좋은 본을 보이게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "자녀의 길을 위해",
+        "text": "하나님, 자녀의 앞길을 지켜주시고 건강한 마음과 바른 판단을 주세요. 제가 지나치게 통제하기보다 믿고 기다릴 줄 알게 하시고, 말보다 삶으로 좋은 본을 보이게 해주세요. 아멘."
+      },
+      {
+        "title": "자녀의 선택을 위한 기도",
+        "text": "하나님, 자녀가 중요한 선택 앞에서 바른 판단을 하게 해주세요. 제가 대신 결정하려 하기보다 필요한 조언을 하고 기다릴 줄 알게 하시며, 자녀가 자신의 삶을 책임 있게 걸어가게 해주세요. 아멘."
+      },
+      {
+        "title": "자녀와 대화하기 위한 기도",
+        "text": "하나님, 자녀와 이야기할 때 가르치려는 마음보다 먼저 듣게 해주세요. 비교하거나 상처 주는 말을 피하고, 필요한 말은 사랑과 존중으로 전하게 해주세요. 서로 마음을 나눌 수 있게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "👵",
+    "name": "부모님",
+    "text": "하나님, 부모님의 건강과 마음을 지켜주세요. 그동안 받은 사랑과 수고를 잊지 않고 감사하게 하시며, 필요한 때 곁을 지키고 따뜻한 말과 행동으로 마음을 전하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "부모님의 평안을 위해",
+        "text": "하나님, 부모님의 건강과 마음을 지켜주세요. 그동안 받은 사랑과 수고를 잊지 않고 감사하게 하시며, 필요한 때 곁을 지키고 따뜻한 말과 행동으로 마음을 전하게 해주세요. 아멘."
+      },
+      {
+        "title": "부모님의 건강을 위한 기도",
+        "text": "하나님, 부모님의 몸과 마음을 지켜주세요. 필요한 검사와 치료를 잘 받게 하시고, 일상 속에서 무리하지 않고 편안히 지내게 해주세요. 제가 더 자주 살피고 마음을 표현하게 해주세요. 아멘."
+      },
+      {
+        "title": "부모님께 감사하는 기도",
+        "text": "하나님, 부모님의 수고와 사랑을 당연하게 여기지 않게 해주세요. 표현하지 못했던 감사와 사랑을 말과 행동으로 전하게 하시고, 남은 시간 함께 좋은 기억을 많이 만들게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "🤝",
+    "name": "친구·지인",
+    "text": "하나님, 제 곁에 있는 사람들을 소중히 여기게 해주세요. 필요할 때 먼저 연락하고 기쁠 때 함께 기뻐하며 어려울 때 외면하지 않게 해주세요. 좋은 관계를 오래 지켜갈 지혜를 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "곁의 사람들을 위해",
+        "text": "하나님, 제 곁에 있는 사람들을 소중히 여기게 해주세요. 필요할 때 먼저 연락하고 기쁠 때 함께 기뻐하며 어려울 때 외면하지 않게 해주세요. 좋은 관계를 오래 지켜갈 지혜를 주세요. 아멘."
+      },
+      {
+        "title": "힘든 친구를 위한 기도",
+        "text": "하나님, 지금 어려움을 겪는 친구를 기억합니다. 필요한 위로와 도움을 주시고, 제가 말만 하기보다 실제로 곁을 지킬 수 있게 해주세요. 그 사람의 마음과 상황에 좋은 길을 열어주세요. 아멘."
+      },
+      {
+        "title": "좋은 관계를 지키는 기도",
+        "text": "하나님, 좋은 사람들을 제 곁에 두심에 감사합니다. 연락을 미루지 않고 기쁨과 어려움을 함께 나누게 하시며, 오해가 생기면 오래 품지 않고 정직하게 풀어가게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "가족·관계",
+    "icon": "🕊️",
+    "name": "갈등이 있을 때",
+    "text": "하나님, 관계가 불편해진 상황에서 감정만 앞세우지 않게 해주세요. 제 잘못이 있다면 인정하고 사과하게 하시고, 상대의 입장도 들을 수 있게 해주세요. 이기기보다 평화를 만드는 길을 찾게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "관계를 회복하기 위해",
+        "text": "하나님, 관계가 불편해진 상황에서 감정만 앞세우지 않게 해주세요. 제 잘못이 있다면 인정하고 사과하게 하시고, 상대의 입장도 들을 수 있게 해주세요. 이기기보다 평화를 만드는 길을 찾게 해주세요. 아멘."
+      },
+      {
+        "title": "먼저 사과할 용기를 구하는 기도",
+        "text": "하나님, 제 잘못이 있다면 자존심 때문에 피하지 않게 해주세요. 변명보다 먼저 사과하고, 상대의 상처를 진심으로 듣게 해주세요. 관계를 회복하기 위한 작은 행동을 시작하게 해주세요. 아멘."
+      },
+      {
+        "title": "거리 두기가 필요할 때",
+        "text": "하나님, 모든 갈등을 억지로 바로 해결하려 하지 않게 해주세요. 감정이 너무 큰 때는 잠시 거리를 두고 마음을 정리하게 하시며, 다시 대화할 적절한 때와 방법을 알려주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "❤️‍🩹",
+    "name": "건강",
+    "text": "하나님, 제 몸과 마음을 돌볼 지혜를 주세요. 몸의 신호를 무시하지 않고 필요한 검사와 치료, 쉼을 잘 선택하게 해주세요. 건강을 당연히 여기지 않고 오늘 할 수 있는 일을 감사히 감당하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "몸과 마음의 건강을 위해",
+        "text": "하나님, 제 몸과 마음을 돌볼 지혜를 주세요. 몸의 신호를 무시하지 않고 필요한 검사와 치료, 쉼을 잘 선택하게 해주세요. 건강을 당연히 여기지 않고 오늘 할 수 있는 일을 감사히 감당하게 해주세요. 아멘."
+      },
+      {
+        "title": "몸이 아플 때의 기도",
+        "text": "하나님, 몸이 불편하고 아픈 시간을 지나고 있습니다. 증상을 가볍게 넘기지 않고 필요한 진료와 치료를 잘 받게 하시며, 회복하는 동안 조급해하지 않게 해주세요. 몸과 마음에 힘을 더해주세요. 아멘."
+      },
+      {
+        "title": "건강한 습관을 위한 기도",
+        "text": "하나님, 건강을 지키는 일이 하루의 작은 선택에서 시작됨을 기억하게 해주세요. 먹는 것과 운동, 수면과 휴식을 균형 있게 관리하고 무리한 욕심보다 꾸준함을 선택하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "💰",
+    "name": "재정",
+    "text": "하나님, 제게 맡겨진 돈을 지혜롭게 관리하게 해주세요. 필요와 욕심을 구별하고 충동보다 계획을 따르게 하시며, 정직하게 벌고 감사히 사용하고 나눌 줄 알게 해주세요. 재정 때문에 마음이 지배되지 않게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "재정을 지혜롭게 관리하도록",
+        "text": "하나님, 제게 맡겨진 돈을 지혜롭게 관리하게 해주세요. 필요와 욕심을 구별하고 충동보다 계획을 따르게 하시며, 정직하게 벌고 감사히 사용하고 나눌 줄 알게 해주세요. 재정 때문에 마음이 지배되지 않게 해주세요. 아멘."
+      },
+      {
+        "title": "지출을 줄여야 할 때",
+        "text": "하나님, 돈을 쓸 때 필요와 욕심을 분별하게 해주세요. 순간의 기분으로 소비하지 않고 계획을 세워 지키게 하시며, 작은 절약을 답답함이 아니라 지혜로 받아들이게 해주세요. 아멘."
+      },
+      {
+        "title": "재정이 어려울 때",
+        "text": "하나님, 돈 문제로 마음이 무겁고 불안합니다. 성급하거나 위험한 선택을 하지 않게 하시고, 현실을 정확히 보고 줄일 것과 해결할 것을 차분히 정리하게 해주세요. 필요한 일과 도움의 길도 열어주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "🧭",
+    "name": "중요한 결정",
+    "text": "하나님, 중요한 선택 앞에서 감정과 욕심에 끌려가지 않게 해주세요. 필요한 정보를 잘 살피고 조언을 들을 겸손을 주시며, 오래 보아도 후회하지 않을 길을 선택할 지혜와 용기를 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "바른 선택을 위해",
+        "text": "하나님, 중요한 선택 앞에서 감정과 욕심에 끌려가지 않게 해주세요. 필요한 정보를 잘 살피고 조언을 들을 겸손을 주시며, 오래 보아도 후회하지 않을 길을 선택할 지혜와 용기를 주세요. 아멘."
+      },
+      {
+        "title": "결정을 서두르고 싶을 때",
+        "text": "하나님, 빨리 결론 내리고 싶은 마음 때문에 중요한 것을 놓치지 않게 해주세요. 사실을 충분히 확인하고 장단점을 차분히 보며, 감정이 가라앉은 뒤 선택하게 해주세요. 아멘."
+      },
+      {
+        "title": "두 선택 사이에서의 기도",
+        "text": "하나님, 어느 길이 더 좋은지 판단하기 어렵습니다. 제 욕심과 두려움을 내려놓고, 장기적으로 무엇이 바르고 유익한지 보게 해주세요. 선택한 뒤에는 책임 있게 감당할 용기도 주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "🧪",
+    "name": "검사 결과 기다릴 때",
+    "text": "하나님, 결과를 기다리는 동안 불안에 휩쓸리지 않게 해주세요. 아직 알 수 없는 일을 미리 단정하지 않게 하시고, 어떤 결과가 나오더라도 필요한 도움과 판단을 잘 받을 수 있도록 인도해주세요. 기다리는 시간에 평안을 주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "기다림 속 평안을 위해",
+        "text": "하나님, 결과를 기다리는 동안 불안에 휩쓸리지 않게 해주세요. 아직 알 수 없는 일을 미리 단정하지 않게 하시고, 어떤 결과가 나오더라도 필요한 도움과 판단을 잘 받을 수 있도록 인도해주세요. 기다리는 시간에 평안을 주세요. 아멘."
+      },
+      {
+        "title": "불안한 기다림의 기도",
+        "text": "하나님, 결과를 기다리는 동안 자꾸 좋지 않은 생각이 떠오릅니다. 아직 정해지지 않은 일을 미리 확정하지 않게 하시고, 오늘의 일상을 지킬 수 있는 평안을 주세요. 아멘."
+      },
+      {
+        "title": "가족의 검사 결과를 기다리며",
+        "text": "하나님, 사랑하는 사람의 검사 결과를 기다리며 마음이 무겁습니다. 그 사람에게 평안을 주시고 의료진에게 지혜를 주세요. 어떤 결과가 나오더라도 필요한 다음 조치를 잘 선택하도록 인도해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "🧱",
+    "name": "실패했을 때",
+    "text": "하나님, 실패 때문에 제 자신까지 부정하지 않게 해주세요. 무엇이 부족했는지 정직하게 배우고, 고칠 것은 고치며 다시 시작할 힘을 주세요. 한 번의 결과가 제 삶 전체를 결정하지 않음을 기억하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "실패 뒤 다시 시작하며",
+        "text": "하나님, 실패 때문에 제 자신까지 부정하지 않게 해주세요. 무엇이 부족했는지 정직하게 배우고, 고칠 것은 고치며 다시 시작할 힘을 주세요. 한 번의 결과가 제 삶 전체를 결정하지 않음을 기억하게 해주세요. 아멘."
+      },
+      {
+        "title": "자책을 멈추는 기도",
+        "text": "하나님, 실패한 일을 반복해서 떠올리며 제 자신을 몰아붙이지 않게 해주세요. 잘못은 인정하되 제 가치까지 부정하지 않고, 배울 것을 정리해 다시 시작하게 해주세요. 아멘."
+      },
+      {
+        "title": "다시 도전하기 위한 기도",
+        "text": "하나님, 한 번의 실패 때문에 다시 시도하기가 두렵습니다. 무엇을 바꿔야 하는지 지혜롭게 돌아보고, 같은 실수는 줄이며 더 준비된 마음으로 다시 도전하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "삶의 문제",
+    "icon": "🚪",
+    "name": "새로운 시작",
+    "text": "하나님, 새로운 일을 시작하는 제 마음을 붙들어주세요. 처음부터 완벽하려 하지 않고 한 걸음씩 배우게 하시며, 두려움 때문에 시도조차 포기하지 않게 해주세요. 좋은 길이라면 담대히 나아가게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "새 출발을 앞두고",
+        "text": "하나님, 새로운 일을 시작하는 제 마음을 붙들어주세요. 처음부터 완벽하려 하지 않고 한 걸음씩 배우게 하시며, 두려움 때문에 시도조차 포기하지 않게 해주세요. 좋은 길이라면 담대히 나아가게 해주세요. 아멘."
+      },
+      {
+        "title": "처음이라 두려울 때",
+        "text": "하나님, 처음 가는 길이라 마음이 불안합니다. 모든 것을 미리 알아야 한다는 부담을 내려놓고, 필요한 것을 하나씩 배우며 나아가게 해주세요. 좋은 사람과 기회를 만나게 해주세요. 아멘."
+      },
+      {
+        "title": "새 습관을 시작하며",
+        "text": "하나님, 좋은 변화를 시작하려 합니다. 처음의 열정만 믿지 않고 작게 시작해 꾸준히 이어가게 하시며, 하루 놓치더라도 포기하지 않고 다시 시작하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "💛",
+    "name": "감사",
+    "text": "하나님, 이미 제게 주신 것들을 다시 바라봅니다. 평범한 하루와 사람들, 먹고 쉬고 움직일 수 있는 일상까지 감사하게 해주세요. 없는 것보다 받은 은혜를 먼저 보고 오늘 감사 한 가지를 꼭 표현하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "받은 은혜를 기억하며",
+        "text": "하나님, 이미 제게 주신 것들을 다시 바라봅니다. 평범한 하루와 사람들, 먹고 쉬고 움직일 수 있는 일상까지 감사하게 해주세요. 없는 것보다 받은 은혜를 먼저 보고 오늘 감사 한 가지를 꼭 표현하게 해주세요. 아멘."
+      },
+      {
+        "title": "평범한 하루에 감사하는 기도",
+        "text": "하나님, 특별한 일이 없어도 평범한 하루 자체가 선물임을 기억하게 해주세요. 먹고 걷고 말하고 쉴 수 있는 일상과 곁의 사람들을 감사하게 해주세요. 오늘 감사 한 가지를 꼭 표현하게 해주세요. 아멘."
+      },
+      {
+        "title": "어려움 속에서도 감사하는 기도",
+        "text": "하나님, 모든 상황이 좋지는 않지만 그 안에서도 감사할 것을 찾게 해주세요. 힘든 시간 속에서 배운 것과 도움받은 손길을 기억하며, 불평만으로 하루를 채우지 않게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "🙇",
+    "name": "회개",
+    "text": "하나님, 제 잘못과 부족함을 숨기지 않고 돌아봅니다. 변명보다 인정하게 하시고, 상처 준 사람이 있다면 바로잡을 용기를 주세요. 같은 실수를 반복하지 않도록 마음과 행동을 새롭게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "잘못을 돌아보며",
+        "text": "하나님, 제 잘못과 부족함을 숨기지 않고 돌아봅니다. 변명보다 인정하게 하시고, 상처 준 사람이 있다면 바로잡을 용기를 주세요. 같은 실수를 반복하지 않도록 마음과 행동을 새롭게 해주세요. 아멘."
+      },
+      {
+        "title": "말로 상처 준 것을 돌아보는 기도",
+        "text": "하나님, 제 말로 누군가를 아프게 했다면 깨닫게 해주세요. 변명하지 않고 사과할 용기를 주시며, 다음에는 감정에 앞서 사랑과 지혜를 선택하게 해주세요. 제 입술을 새롭게 해주세요. 아멘."
+      },
+      {
+        "title": "반복하는 잘못을 내려놓는 기도",
+        "text": "하나님, 같은 잘못을 반복하는 제 모습을 돌아봅니다. 후회로만 끝내지 않고 원인을 살피며 실제로 바꿀 행동을 시작하게 해주세요. 넘어져도 다시 돌이키는 마음을 주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "🕯️",
+    "name": "믿음이 흔들릴 때",
+    "text": "하나님, 마음에 의심과 흔들림이 있을 때 억지로 감추지 않고 주님께 솔직히 말씀드립니다. 이해되지 않는 상황 속에서도 성급히 포기하지 않게 하시고, 작은 믿음이라도 붙들고 오늘을 살아가게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "흔들리는 마음을 맡기며",
+        "text": "하나님, 마음에 의심과 흔들림이 있을 때 억지로 감추지 않고 주님께 솔직히 말씀드립니다. 이해되지 않는 상황 속에서도 성급히 포기하지 않게 하시고, 작은 믿음이라도 붙들고 오늘을 살아가게 해주세요. 아멘."
+      },
+      {
+        "title": "기도해도 답이 없는 것 같을 때",
+        "text": "하나님, 오래 기도해도 변화가 보이지 않아 마음이 흔들립니다. 제 시간표만 고집하지 않게 하시고, 기다리는 동안 제가 해야 할 일을 성실히 하게 해주세요. 작은 믿음을 붙들어주세요. 아멘."
+      },
+      {
+        "title": "이해되지 않는 일을 만났을 때",
+        "text": "하나님, 왜 이런 일이 생겼는지 이해되지 않습니다. 억지로 괜찮은 척하지 않고 솔직한 마음을 주님께 말씀드리게 해주세요. 답을 다 알지 못해도 오늘 한 걸음 살아갈 믿음을 주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "📖",
+    "name": "말씀 읽기 전",
+    "text": "하나님, 말씀을 읽기 전에 제 마음을 조용히 합니다. 많이 읽는 것보다 한 말씀이라도 제대로 듣고 이해하게 하시며, 제 삶에 필요한 깨달음을 주시고 오늘 실천할 한 가지를 발견하게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "말씀을 듣기 위해",
+        "text": "하나님, 말씀을 읽기 전에 제 마음을 조용히 합니다. 많이 읽는 것보다 한 말씀이라도 제대로 듣고 이해하게 하시며, 제 삶에 필요한 깨달음을 주시고 오늘 실천할 한 가지를 발견하게 해주세요. 아멘."
+      },
+      {
+        "title": "집중해서 읽기 위한 기도",
+        "text": "하나님, 말씀을 읽는 동안 다른 생각에 마음을 빼앗기지 않게 해주세요. 많은 분량보다 한 구절이라도 깊이 생각하고, 제 삶에 필요한 뜻을 발견하게 해주세요. 아멘."
+      },
+      {
+        "title": "삶에 적용하기 위한 기도",
+        "text": "하나님, 말씀을 아는 것에서 끝나지 않게 해주세요. 오늘 읽은 내용 가운데 제가 바꿔야 할 말과 행동을 깨닫게 하시고, 작은 것 하나라도 실제로 순종하게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "⛪",
+    "name": "예배 전",
+    "text": "하나님, 예배의 자리로 나아갑니다. 몸만 참석하는 것이 아니라 마음도 주님께 향하게 하시고, 분주한 생각을 내려놓게 해주세요. 말씀을 귀 기울여 듣고 감사와 진실한 마음으로 예배드리게 해주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "예배를 준비하며",
+        "text": "하나님, 예배의 자리로 나아갑니다. 몸만 참석하는 것이 아니라 마음도 주님께 향하게 하시고, 분주한 생각을 내려놓게 해주세요. 말씀을 귀 기울여 듣고 감사와 진실한 마음으로 예배드리게 해주세요. 아멘."
+      },
+      {
+        "title": "마음을 모으는 기도",
+        "text": "하나님, 예배를 앞두고 흩어진 생각을 모읍니다. 걱정과 휴대폰과 다른 일에 마음을 빼앗기지 않고, 찬양과 말씀과 기도에 집중하게 해주세요. 진실한 마음으로 예배드리게 해주세요. 아멘."
+      },
+      {
+        "title": "말씀을 받을 준비의 기도",
+        "text": "하나님, 제가 듣고 싶은 말만 찾지 않게 해주세요. 필요한 말씀이라면 불편해도 겸손히 듣고, 깨달은 것을 삶에 적용할 용기를 주세요. 예배가 한 주의 변화로 이어지게 해주세요. 아멘."
+      }
+    ]
+  },
+  {
+    "group": "신앙생활",
+    "icon": "🙏",
+    "name": "중보기도",
+    "text": "하나님, 지금 제 마음에 떠오르는 사람을 위해 기도합니다. 그 사람의 형편과 필요를 아시니 필요한 힘과 도움을 주세요. 제가 할 수 있는 일이 있다면 외면하지 않게 하시고, 그 삶에 평안과 좋은 길을 열어주세요. 아멘.",
+    "prayers": [
+      {
+        "title": "다른 사람을 위해",
+        "text": "하나님, 지금 제 마음에 떠오르는 사람을 위해 기도합니다. 그 사람의 형편과 필요를 아시니 필요한 힘과 도움을 주세요. 제가 할 수 있는 일이 있다면 외면하지 않게 하시고, 그 삶에 평안과 좋은 길을 열어주세요. 아멘."
+      },
+      {
+        "title": "아픈 사람을 위한 기도",
+        "text": "하나님, 몸과 마음이 아픈 사람을 기억합니다. 치료 과정에 힘을 주시고 의료진에게 지혜를 주세요. 두려움과 외로움 속에서 위로하시고 가족들에게도 견딜 힘을 더해주세요. 아멘."
+      },
+      {
+        "title": "어려움에 있는 사람을 위한 기도",
+        "text": "하나님, 경제적 어려움이나 관계의 문제로 힘든 사람들을 기억합니다. 필요한 도움과 좋은 사람을 만나게 하시고, 절망하지 않고 다시 일어설 길을 열어주세요. 저도 할 수 있는 도움을 외면하지 않게 해주세요. 아멘."
+      }
+    ]
+  }
 ];
 
 let trainingStep=1, sentenceIndex=0, miniInterval=null, timerInterval=null;
@@ -717,22 +1289,40 @@ function changePrayer(delta){
 }
 let currentSituationGroup='전체';
 const situationGroups=['전체','하루생활','마음·감정','가족·관계','삶의 문제','신앙생활'];
+let currentSituationCategoryIndex=0;
+let currentSituationPrayerIndex=0;
 
-function getSituationFavorites(){
-  return JSON.parse(localStorage.getItem('situationFavorites')||'[]');
+function situationPrayerKey(categoryIndex, prayerIndex){
+  return `${categories[categoryIndex].name}::${prayerIndex}`;
+}
+function getSituationPrayerFavorites(){
+  let favs=JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]');
+  // v1.3.3의 '상황 즐겨찾기'가 있으면 그 상황의 첫 기도문 즐겨찾기로 1회 승계
+  if(!favs.length){
+    const old=JSON.parse(localStorage.getItem('situationFavorites')||'[]');
+    if(old.length){
+      favs=old.map(name=>{const i=categories.findIndex(c=>c.name===name);return i>=0?situationPrayerKey(i,0):null}).filter(Boolean);
+      localStorage.setItem('situationPrayerFavorites',JSON.stringify(favs));
+    }
+  }
+  return favs;
 }
 function setSituationGroup(group){
   currentSituationGroup=group;
   renderSituations();
 }
+function favoriteCountForCategory(i){
+  const favs=getSituationPrayerFavorites();
+  return categories[i].prayers.reduce((n,_p,pi)=>n+(favs.includes(situationPrayerKey(i,pi))?1:0),0);
+}
 function categoryTile(c,i){
-  const fav=getSituationFavorites().includes(c.name);
-  return `<button class="tile" onclick="openCategory(${i})"><span>${c.icon}</span><strong>${c.name}${fav?' ⭐':''}</strong></button>`;
+  const favCount=favoriteCountForCategory(i);
+  return `<button class="tile" onclick="openCategory(${i})"><span>${c.icon}</span><strong>${c.name}${favCount?' ⭐':''}</strong><small class="tile-note">기도 3개${favCount?` · 즐겨찾기 ${favCount}`:''}</small></button>`;
 }
 function renderHomeCategories(){
-  const favs=getSituationFavorites();
+  const favored=categories.map((c,i)=>({c,i,n:favoriteCountForCategory(i)})).filter(x=>x.n>0).map(x=>x.c.name);
   const defaults=['아침','힘들 때','가족','감사'];
-  const names=[...favs,...defaults].filter((v,i,a)=>a.indexOf(v)===i).slice(0,4);
+  const names=[...favored,...defaults].filter((v,i,a)=>a.indexOf(v)===i).slice(0,4);
   document.getElementById('homeCategories').innerHTML=names.map(name=>{
     const i=categories.findIndex(c=>c.name===name); return i>=0?categoryTile(categories[i],i):'';
   }).join('');
@@ -741,38 +1331,75 @@ function renderCategories(){
   renderHomeCategories();
   renderSituations();
 }
+function situationSearchText(c){
+  return `${c.name} ${c.group} ${c.prayers.map(p=>`${p.title} ${p.text}`).join(' ')}`.toLowerCase();
+}
 function renderSituations(){
   const q=(document.getElementById('situationSearch')?.value||'').trim().toLowerCase();
   const chips=document.getElementById('situationChips');
   if(chips) chips.innerHTML=situationGroups.map(g=>`<button class="chip ${g===currentSituationGroup?'active':''}" onclick="setSituationGroup('${g}')">${g}</button>`).join('');
-  const favNames=getSituationFavorites();
+  const favs=getSituationPrayerFavorites();
   const favWrap=document.getElementById('favoriteSituations');
   if(favWrap){
-    const favItems=categories.map((c,i)=>({c,i})).filter(x=>favNames.includes(x.c.name) && (!q || `${x.c.name} ${x.c.group} ${x.c.text}`.toLowerCase().includes(q)));
-    favWrap.innerHTML=favItems.length?`<div class="group-block"><div class="group-head"><div class="group-title">⭐ 즐겨찾기</div><div class="group-count">${favItems.length}개</div></div><div class="grid">${favItems.map(x=>categoryTile(x.c,x.i)).join('')}</div></div>`:'';
+    const favItems=[];
+    categories.forEach((c,i)=>c.prayers.forEach((p,pi)=>{
+      const key=situationPrayerKey(i,pi);
+      const text=`${c.name} ${c.group} ${p.title} ${p.text}`.toLowerCase();
+      if(favs.includes(key) && (!q || text.includes(q))) favItems.push({c,p,i,pi});
+    }));
+    favWrap.innerHTML=favItems.length?`<div class="group-block"><div class="group-head"><div class="group-title">⭐ 즐겨찾기 기도문</div><div class="group-count">${favItems.length}개</div></div><div class="grid">${favItems.map(x=>`<button class="tile" onclick="openCategory(${x.i},${x.pi})"><span>${x.c.icon}</span><strong>${x.c.name}</strong><small class="tile-note">${escapeHtml(x.p.title)}</small></button>`).join('')}</div></div>`:'';
   }
   const groups=currentSituationGroup==='전체'?situationGroups.slice(1):[currentSituationGroup];
   const html=groups.map(group=>{
-    const items=categories.map((c,i)=>({c,i})).filter(x=>x.c.group===group && (!q || `${x.c.name} ${x.c.group} ${x.c.text}`.toLowerCase().includes(q)));
+    const items=categories.map((c,i)=>({c,i})).filter(x=>x.c.group===group && (!q || situationSearchText(x.c).includes(q)));
     if(!items.length)return '';
-    return `<div class="group-block"><div class="group-head"><div class="group-title">${group}</div><div class="group-count">${items.length}개</div></div><div class="grid">${items.map(x=>categoryTile(x.c,x.i)).join('')}</div></div>`;
+    return `<div class="group-block"><div class="group-head"><div class="group-title">${group}</div><div class="group-count">${items.length}개 상황 · ${items.length*3}개 기도</div></div><div class="grid">${items.map(x=>categoryTile(x.c,x.i)).join('')}</div></div>`;
   }).join('');
   const target=document.getElementById('allCategories');
   if(target) target.innerHTML=html || `<div class="empty-state">찾는 기도가 없어.<br>다른 단어로 검색해봐.</div>`;
 }
-function toggleSituationFavorite(i){
-  const c=categories[i];
-  let favs=getSituationFavorites();
-  if(favs.includes(c.name)) favs=favs.filter(x=>x!==c.name); else favs.push(c.name);
-  localStorage.setItem('situationFavorites',JSON.stringify(favs));
-  renderHomeCategories(); renderSituations(); openCategory(i);
-}
-function openCategory(i){
-  const c=categories[i];
-  const fav=getSituationFavorites().includes(c.name);
-  document.getElementById('modalTitle').textContent=`${c.icon} ${c.name} 기도`;
-  document.getElementById('modalBody').innerHTML=`<div class="small" style="margin-bottom:8px">${c.group}</div><div class="prayer">${c.text}</div><div class="row" style="margin-top:14px"><button class="btn secondary" onclick="toggleSituationFavorite(${i})">${fav?'★ 즐겨찾기 해제':'☆ 즐겨찾기'}</button><button class="btn good" onclick="markTodayDone();closeModal()">기도 완료 ✓</button></div>`;
+function openCategory(i, prayerIndex=null){
+  currentSituationCategoryIndex=i;
+  if(prayerIndex===null){
+    const favs=getSituationPrayerFavorites();
+    const firstFav=categories[i].prayers.findIndex((_p,pi)=>favs.includes(situationPrayerKey(i,pi)));
+    currentSituationPrayerIndex=firstFav>=0?firstFav:0;
+  }else{
+    currentSituationPrayerIndex=Math.max(0,Math.min(categories[i].prayers.length-1,prayerIndex));
+  }
+  renderSituationModal();
   document.getElementById('modal').classList.add('show');
+}
+function changeSituationPrayer(delta){
+  const c=categories[currentSituationCategoryIndex];
+  currentSituationPrayerIndex=(currentSituationPrayerIndex+delta+c.prayers.length)%c.prayers.length;
+  renderSituationModal();
+}
+function toggleSituationPrayerFavorite(){
+  const key=situationPrayerKey(currentSituationCategoryIndex,currentSituationPrayerIndex);
+  let favs=getSituationPrayerFavorites();
+  if(favs.includes(key)) favs=favs.filter(x=>x!==key); else favs.push(key);
+  localStorage.setItem('situationPrayerFavorites',JSON.stringify(favs));
+  renderHomeCategories(); renderSituations(); renderSituationModal();
+}
+function renderSituationModal(){
+  const c=categories[currentSituationCategoryIndex];
+  const p=c.prayers[currentSituationPrayerIndex];
+  const fav=getSituationPrayerFavorites().includes(situationPrayerKey(currentSituationCategoryIndex,currentSituationPrayerIndex));
+  document.getElementById('modalTitle').textContent=`${c.icon} ${c.name} 기도`;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="small">${c.group}</div>
+    <div class="prayer-browser">
+      <button class="btn ghost" onclick="changeSituationPrayer(-1)">‹ 이전 기도</button>
+      <div class="prayer-count">기도 ${currentSituationPrayerIndex+1} / ${c.prayers.length}</div>
+      <button class="btn ghost" onclick="changeSituationPrayer(1)">다음 기도 ›</button>
+    </div>
+    <div class="situation-prayer-title">${escapeHtml(p.title)}</div>
+    <div class="prayer">${escapeHtml(p.text)}</div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn secondary" onclick="toggleSituationPrayerFavorite()">${fav?'★ 즐겨찾기 해제':'☆ 이 기도 즐겨찾기'}</button>
+      <button class="btn good" onclick="markTodayDone();closeModal()">기도 완료 ✓</button>
+    </div>`;
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');clearInterval(timerInterval)}
 function showView(id,btn){
@@ -828,7 +1455,8 @@ function getData(){
     done:JSON.parse(localStorage.getItem('prayerDone')||'[]'),
     prayers:JSON.parse(localStorage.getItem('myPrayers')||'[]'),
     requests:JSON.parse(localStorage.getItem('prayerRequests')||'[]'),
-    situationFavorites:JSON.parse(localStorage.getItem('situationFavorites')||'[]')
+    situationFavorites:JSON.parse(localStorage.getItem('situationFavorites')||'[]'),
+    situationPrayerFavorites:JSON.parse(localStorage.getItem('situationPrayerFavorites')||'[]')
   };
 }
 function markTodayDone(show=true){
@@ -1053,11 +1681,11 @@ function calcStreak(done){
   return count;
 }
 function exportBackup(){
-  const payload={version:2,exportedAt:new Date().toISOString(),...getData()};
+  const payload={version:3,exportedAt:new Date().toISOString(),...getData()};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`today-prayer-backup-${localDateKey()}.json`;a.click();URL.revokeObjectURL(a.href)
 }
 function importBackup(ev){
-  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
+  const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.done))localStorage.setItem('prayerDone',JSON.stringify(d.done));if(Array.isArray(d.prayers))localStorage.setItem('myPrayers',JSON.stringify(d.prayers));if(Array.isArray(d.requests))localStorage.setItem('prayerRequests',JSON.stringify(d.requests));if(Array.isArray(d.situationFavorites))localStorage.setItem('situationFavorites',JSON.stringify(d.situationFavorites));if(Array.isArray(d.situationPrayerFavorites))localStorage.setItem('situationPrayerFavorites',JSON.stringify(d.situationPrayerFavorites));renderCategories();renderPrayerRequests();renderMyPrayers();renderCalendar();alert('백업을 불러왔어.')}catch(e){alert('백업 파일을 확인해줘.')}};r.readAsText(file)
 }
 
 document.getElementById('todayLabel').textContent=formatToday();
@@ -1069,7 +1697,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=1.3.3');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=1.3.4');
       await reg.update();
     }catch(e){}
   });
