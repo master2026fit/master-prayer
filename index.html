@@ -21,7 +21,7 @@
     button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
     button:focus:not(:focus-visible){outline:none}
     button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;line-height:1.65}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
     button,input,textarea{font:inherit}
     .app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:90px}
     header{padding:22px 18px 10px}
@@ -173,6 +173,7 @@
     @media(max-width:420px){.prayer{font-size:18px}.grid{grid-template-columns:1fr 1fr}.title{font-size:21px}}
 
     .easy-guide-btn{margin-top:9px}
+    .btn.official-link{display:block;margin-top:9px;text-align:center;text-decoration:none;background:#e9f1e9;color:#42684b}
     .easy-guide-head{background:linear-gradient(145deg,#fffdf9 0%,#fff6df 100%);border:1px solid #f0dfb6;border-radius:18px;padding:16px;margin:10px 0}
     .easy-guide-head strong{display:block;font-size:20px;margin-bottom:4px}
     .easy-guide-section{margin:16px 0}
@@ -198,7 +199,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.1</div>
+    <div class="version">v2.2</div>
   </header>
 
   <main>
@@ -360,7 +361,7 @@
       </div>
 
       <div class="card">
-        <div class="label">성경 찾기 · 개역한글</div>
+        <div class="label">성경 찾기 · 개역한글(KRV)</div>
         <div class="title">66권에서 바로 찾기</div>
         <div class="bible-selects">
           <select id="bibleBookSelect" onchange="onBibleBookChange()"></select>
@@ -376,6 +377,7 @@
           <button class="btn good" onclick="toggleBibleChapterRead()" id="bibleReadBtn">이 장 읽음 ✓</button>
         </div>
         <div class="bible-status" id="bibleStatus"></div>
+        <a class="btn official-link full" href="https://bible.bskorea.or.kr/bible_reader" target="_blank" rel="noopener noreferrer">📖 개역개정 성경 읽기 · 대한성서공회 ↗</a>
         <button class="btn secondary full easy-guide-btn" onclick="openBibleEasyGuide()">💡 이 장 쉽게 이해하기</button>
       </div>
 
@@ -2057,7 +2059,7 @@ function bibleExtractNames(text){
   for(const raw of tokens){const w=raw.replace(/(에게|에서|으로|이라|이요|이며|하니|하고|하라|하되|하매|하였|하였더라|하리라|하니라|하더라|하는|하여|하므로)$/,'');if(w.length<2||bibleEasyStop.has(w))continue; if(bibleThemeRules.some(r=>r.words.some(k=>w.includes(k)||k.includes(w))))continue;counts[w]=(counts[w]||0)+1}
   return Object.entries(counts).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([w])=>w);
 }
-function bibleClip(s,n=86){s=String(s||'').replace(/\s+/g,' ').trim();return s.length>n?s.slice(0,n)+'…':s}
+function bibleClip(s){return String(s||'').replace(/\s+/g,' ').trim()}
 function bibleFlowVerses(verses,themes){
   if(!verses.length)return[];
   const n=verses.length, thirds=[[0,Math.max(1,Math.ceil(n/3))],[Math.floor(n/3),Math.max(Math.floor(n/3)+1,Math.ceil(n*2/3))],[Math.floor(n*2/3),n]];
@@ -2070,7 +2072,7 @@ function bibleFlowVerses(verses,themes){
 }
 function bibleChapterAnalysis(bookId,chapter,verses){
   const info=getBibleEasyGuide(bookId,chapter), key=`${bookId}-${chapter}`,ov=bibleChapterOverrides[key]||null;
-  const text=verses.map(v=>v.text).join(' '), rules=bibleAnalyzeThemes(text,info.guide), names=bibleExtractNames(text), flow=bibleFlowVerses(verses,rules);
+  const text=verses.map(v=>v.text).join(' '), rules=bibleAnalyzeThemes(text,info.guide), names=[], flow=bibleFlowVerses(verses,rules);
   const themeLabels=ov?.themes||rules.map(r=>r.label);
   let summary=ov?.summary;
   if(!summary){const who=names.length?`${names.slice(0,2).join('·')}과 관련된 내용 속에서 `:'';const t=themeLabels.slice(0,2).join('·');summary=`${who}${t||info.section.text}을 중심으로 하나님의 뜻과 사람들의 반응을 살펴보는 장이야.`}
@@ -2099,7 +2101,7 @@ async function openBibleEasyGuide(){
     <div class="easy-guide-section"><h3>④ 책 전체에서 어디쯤?</h3><div class="easy-guide-box"><strong>${info.book.name} ${range}</strong>의 흐름 안에 있고 책 전체로 보면 <strong>${info.position}</strong>이야.<br><br>${escapeHtml(info.section.text)}<br><br><span class="small">읽는 팁 · ${escapeHtml(info.guide.tip)}</span></div></div>
     <div class="easy-guide-section"><h3>⑤ 오늘 나에게</h3><div class="easy-guide-box">${escapeHtml(a.apply)}</div></div>
     <div class="easy-guide-section"><h3>⑥ 이 말씀으로 짧게 기도</h3><div class="easy-guide-box">${escapeHtml(a.prayer)}</div></div>
-    <div class="easy-guide-note">※ v2.1부터는 같은 구간 설명을 반복하는 방식이 아니라 현재 장의 실제 본문을 읽어 핵심 주제와 시작·중간·마무리 흐름을 따로 잡아줘. 주요 장은 별도 장별 해설을 넣었고, 나머지 장도 본문에 따라 내용이 달라져. 세부 해석은 교단과 주석에 따라 다를 수 있으니 본문을 중심으로 확인해.</div>`;
+    <div class="easy-guide-note">※ 이 설명은 본문의 단어와 장별 요약을 바탕으로 만든 참고용 학습 자료야. 공식 성경 주석이나 정확한 인물·주제 판정은 아니므로 위에 표시된 실제 구절과 비교하며 읽어줘.</div>`;
   document.getElementById('modal').classList.add('show');
 }
 
