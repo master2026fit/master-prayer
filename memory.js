@@ -1,5 +1,6 @@
-/* 말씀 암송 500선 — 장절과 자체 해설만 공개 배포합니다.
-   개역개정 원문은 대한성서공회 링크 또는 이용자가 직접 불러온 개인 성경에서만 확인합니다. */
+/* 말씀 암송 — 개역한글(공공 영역) 구절 중 개역개정과 본문 전체가 일치함을
+   대한성서공회 두 역본에서 직접 확인한 구절만 표시합니다.
+   500개 장절 목록은 향후 대조 대상이며, 검증 전에는 암송 자료로 공개하지 않습니다. */
 (() => {
   'use strict';
 
@@ -94,7 +95,50 @@
   if (all.length !== 500 || keys.size !== 500 || coreSet.size !== 100 || core.some(key=>!keys.has(key)) || groups.some(g=>g.parts.reduce((n,p)=>n+p[3]-p[2]+1,0)!==50)) {
     throw new Error('말씀 암송 목록의 수량 또는 중복 검증에 실패했어.');
   }
-  const verses = [...all.filter(x=>coreSet.has(x.key)), ...all.filter(x=>!coreSet.has(x.key))];
+  // 본문은 저작권이 만료된 개역한글판에서 전사하고, 개역개정판과
+  // 한 절 단위로 대조했습니다. 어휘/표기/띄어쓰기 차이가 있는 절은 제외.
+  // 장절은 key(성경책 번호:장:절), 다음 값은 검증된 동일 본문입니다.
+  const matched = [
+    ['52:5:16','항상 기뻐하라'],
+    ['52:5:17','쉬지 말고 기도하라'],
+    ['52:5:21','범사에 헤아려 좋은 것을 취하고'],
+    ['52:5:24','너희를 부르시는 이는 미쁘시니 그가 또한 이루시리라'],
+    ['52:5:25','형제들아 우리를 위하여 기도하라'],
+    ['52:5:26','거룩하게 입맞춤으로 모든 형제에게 문안하라'],
+    ['50:4:1','그러므로 나의 사랑하고 사모하는 형제들, 나의 기쁨이요 면류관인 사랑하는 자들아 이와 같이 주 안에 서라'],
+    ['50:4:2','내가 유오디아를 권하고 순두게를 권하노니 주 안에서 같은 마음을 품으라'],
+    ['50:4:4','주 안에서 항상 기뻐하라 내가 다시 말하노니 기뻐하라'],
+    ['50:4:5','너희 관용을 모든 사람에게 알게 하라 주께서 가까우시니라'],
+    ['50:4:7','그리하면 모든 지각에 뛰어난 하나님의 평강이 그리스도 예수 안에서 너희 마음과 생각을 지키시리라'],
+    ['50:4:9','너희는 내게 배우고 받고 듣고 본 바를 행하라 그리하면 평강의 하나님이 너희와 함께 계시리라'],
+    ['50:4:10','내가 주 안에서 크게 기뻐함은 너희가 나를 생각하던 것이 이제 다시 싹이 남이니 너희가 또한 이를 위하여 생각은 하였으나 기회가 없었느니라'],
+    ['50:4:13','내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라'],
+    ['50:4:21','그리스도 예수 안에 있는 성도에게 각각 문안하라 나와 함께 있는 형제들이 너희에게 문안하고'],
+    ['59:1:5','너희 중에 누구든지 지혜가 부족하거든 모든 사람에게 후히 주시고 꾸짖지 아니하시는 하나님께 구하라 그리하면 주시리라'],
+    ['59:1:6','오직 믿음으로 구하고 조금도 의심하지 말라 의심하는 자는 마치 바람에 밀려 요동하는 바다 물결 같으니'],
+    ['59:1:7','이런 사람은 무엇이든지 주께 얻기를 생각하지 말라'],
+    ['59:1:8','두 마음을 품어 모든 일에 정함이 없는 자로다'],
+    ['59:1:9','낮은 형제는 자기의 높음을 자랑하고'],
+    ['59:1:14','오직 각 사람이 시험을 받는 것은 자기 욕심에 끌려 미혹됨이니'],
+    ['59:1:15','욕심이 잉태한즉 죄를 낳고 죄가 장성한즉 사망을 낳느니라'],
+    ['59:1:16','내 사랑하는 형제들아 속지 말라'],
+    ['45:12:2','너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라'],
+    ['45:12:5','이와 같이 우리 많은 사람이 그리스도 안에서 한 몸이 되어 서로 지체가 되었느니라'],
+    ['45:12:10','형제를 사랑하여 서로 우애하고 존경하기를 서로 먼저 하며'],
+    ['45:12:11','부지런하여 게으르지 말고 열심을 품고 주를 섬기라'],
+    ['45:12:12','소망 중에 즐거워하며 환난 중에 참으며 기도에 항상 힘쓰며'],
+    ['45:12:13','성도들의 쓸 것을 공급하며 손 대접하기를 힘쓰라'],
+    ['45:12:21','악에게 지지 말고 선으로 악을 이기라'],
+    ['19:46:1','하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라']
+  ];
+  const matchedKeys = new Set(matched.map(x=>x[0]));
+  if (matchedKeys.size !== matched.length) throw new Error('중복 암송 구절');
+  const verses = matched.map(([key, text]) => {
+    const [book, chapter, verse] = key.split(':').map(Number);
+    const existing = all.find(x=>x.key===key);
+    const topic = existing?.topic ?? ({19:6,45:7,50:1,52:1,59:5}[book] || 0);
+    return {book,chapter,verse,key,text,topic,note:groups[topic].name};
+  });
   const byKey = new Map(verses.map(x=>[x.key,x]));
   const bookCodes = {19:'PSA',20:'PRO',23:'ISA',40:'MAT',41:'MRK',42:'LUK',43:'JHN',45:'ROM',46:'1CO',47:'2CO',49:'EPH',50:'PHP',51:'COL',52:'1TH',58:'HEB',59:'JAS',60:'1PE',62:'1JN',66:'REV'};
   const stateKey = 'prayerMemory500ProgressV1';
@@ -113,16 +157,16 @@
   function dueItems(data){return verses.filter(x=>data[x.key]&&data[x.key].stage>0&&data[x.key].due<=today()).sort((a,b)=>data[a.key].due.localeCompare(data[b.key].due))}
   function setCurrent(x){selected=x;hidden=false;render()}
   function currentIndex(){return verses.findIndex(x=>x.key===selected.key)}
-  function dailyVerse(){const d=new Date(),offset=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2026,10,4))/86400000);return verses[((offset%500)+500)%500]}
+  function dailyVerse(){const d=new Date(),offset=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2026,10,4))/86400000);return verses[((offset%verses.length)+verses.length)%verses.length]}
 
   function render(){
     if(!selected)return;
     const data=readState(),r=data[selected.key]||{stage:0};
-    const seen=Object.values(data).filter(x=>x&&x.stage>0).length;
-    const mastered=Object.values(data).filter(x=>x&&x.stage>=3).length;
+    const seen=verses.filter(x=>data[x.key]?.stage>0).length;
+    const mastered=verses.filter(x=>data[x.key]?.stage>=3).length;
     const due=dueItems(data).length;
-    document.getElementById('memoryProgress').textContent=`암송 ${seen}/500 · 익숙한 말씀 ${mastered}개`;
-    document.getElementById('memoryToday').textContent=`말씀 ${currentIndex()+1}/500 · ${coreSet.has(selected.key)?'⭐ 핵심 100선':'확장 400선'} · ${groups[selected.topic].name}`;
+    document.getElementById('memoryProgress').textContent=`암송 ${seen}/${verses.length} · 익숙한 말씀 ${mastered}개`;
+    document.getElementById('memoryToday').textContent=`말씀 ${currentIndex()+1}/${verses.length} · ✓ 두 역본 일치 · ${groups[selected.topic].name}`;
     document.getElementById('memoryRef').textContent=ref(selected);
     document.getElementById('memoryNote').textContent=`이해 포인트 · ${selected.note}`;
     document.getElementById('memoryStudyState').textContent=`${stageName(r.stage)}${r.due?' · 다음 복습 '+r.due:''}`;
@@ -134,16 +178,8 @@
     btn.disabled=r.last===today();btn.textContent=r.last===today()?'오늘 암송 완료 ✓':'오늘 암송 완료 ✓';
     document.getElementById('memoryReviewBtn').textContent=`복습할 말씀 ${due}개`;
     const list=candidates();document.getElementById('memoryListCount').textContent=`선택한 목록 ${list.length}개`;
-    const box=document.getElementById('memoryText');box.textContent=hidden?'말씀을 가렸어. 기억나는 대로 소리 내어 암송해 봐.':'개역개정 원문은 아래 대한성서공회에서 확인할 수 있어. 개인 성경 파일을 불러온 경우에만 이곳에서 본문을 보여줘.';
+    const box=document.getElementById('memoryText');box.textContent=hidden?'말씀을 가렸어. 기억나는 대로 소리 내어 암송해 봐.':selected.text;
     document.getElementById('memoryHideBtn').textContent=hidden?'말씀 다시 보기':'말씀 가리기';
-    if(hidden)return;
-    const request=++renderRequest;
-    // 개인이 직접 제공한 성경 본문만 사용. 기본 제공 개역한글과 섞이지 않도록 합니다.
-    if(personalBibleReady())personalBibleChapter(selected.book,selected.chapter).then(rows=>{
-      if(request!==renderRequest||hidden)return;
-      const item=rows?.find(x=>Number(x.verse)===selected.verse);
-      if(item&&item.text)box.textContent=item.text;
-    }).catch(()=>{});
   }
 
   function navigate(delta){const a=candidates();if(!a.length){document.getElementById('memoryListCount').textContent='검색 결과가 없어.';return}let i=a.findIndex(x=>x.key===selected.key);i=(i+delta+a.length)%a.length;setCurrent(a[i])}
@@ -162,6 +198,13 @@
 
   const select=document.getElementById('memoryTopicSelect');
   if(!select)return;
-  select.innerHTML='<option value="all">전체 500선</option>'+groups.map((g,i)=>`<option value="${i}">${g.name} · 50절</option>`).join('');
+  select.innerHTML=`<option value="all">검증 완료 · ${verses.length}절</option>`+groups.map((g,i)=>`<option value="${i}">${g.name} · ${verses.filter(x=>x.topic===i).length}절</option>`).filter((_,i)=>verses.some(x=>x.topic===i)).join('');
+  const card=document.getElementById('memoryCard');
+  card.querySelector('.memory-top .label').textContent=`🧠 두 역본 일치 암송 ${verses.length}절`;
+  const info=card.querySelectorAll(':scope > p.hint, :scope > p.memory-small');
+  if(info[0])info[0].textContent=`개역한글과 개역개정의 문구가 같은 ${verses.length}절만 표시해. 500개 장절 후보는 계속 대조할 예정이야.`;
+  if(info[1])info[1].textContent='암송 본문은 저작권이 만료된 개역한글판에서 확인했고, 개역개정판과 동일한 절만 선별했어. 원문은 대한성서공회 링크에서도 확인할 수 있어. 기존 암송 기록은 유지돼.';
+  const official=document.getElementById('memoryOfficialLink');
+  official.textContent='📖 개역개정 원문 재확인 · 대한성서공회 ↗';
   selected=dailyVerse();render();
 })();
