@@ -197,6 +197,20 @@
     .easy-flow-item .ref{font-weight:900;color:var(--text);margin-right:6px}
     .easy-flow-item .excerpt{color:var(--text);line-height:1.7}
     .easy-guide-badge{display:inline-block;background:#eef5ef;color:#466b4e;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;margin-bottom:8px}
+
+    .memory-card{background:linear-gradient(145deg,#fffdf9,#f1eaf6);border:1px solid #dfd6e8}
+    .memory-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+    .memory-progress{font-size:12px;color:#66527f;font-weight:800}
+    .memory-topic{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+    .memory-topic select,.memory-topic input{min-width:0}
+    .memory-ref{font-size:22px;font-weight:900;color:var(--text);margin:9px 0}
+    .memory-verse{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;line-height:1.8;min-height:92px;font-size:16px;word-break:keep-all;overflow-wrap:break-word;white-space:pre-wrap}
+    .memory-note{font-size:13px;line-height:1.65;color:#675977;margin:10px 0 12px}
+    .memory-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+    .memory-buttons .btn{padding:11px 7px;font-size:13px}
+    .memory-status{font-size:13px;color:var(--good);font-weight:800;margin-top:11px}
+    .memory-small{font-size:12px;color:var(--muted);line-height:1.6}
+    .memory-card .btn[disabled]{opacity:.5;cursor:default}
   </style>
 </head>
 <body>
@@ -205,7 +219,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.3</div>
+    <div class="version">v2.4</div>
   </header>
 
   <main>
@@ -358,6 +372,37 @@
 
     <section id="bible" class="view">
       <div class="resource-panel active" id="biblePanel">
+
+      <div class="card memory-card" id="memoryCard">
+        <div class="memory-top">
+          <div class="label">🧠 말씀 암송 500선</div>
+          <span class="memory-progress" id="memoryProgress">암송 0/500</span>
+        </div>
+        <div class="title">평생 간직할 말씀 한 구절씩</div>
+        <p class="hint">핵심 100절부터 시작해서 10가지 주제의 500절을 차근차근 익혀봐.</p>
+        <div class="memory-topic">
+          <select id="memoryTopicSelect" aria-label="암송 주제 선택" onchange="memoryChooseTopic()"><option>목록 준비 중</option></select>
+          <input id="memorySearch" type="search" placeholder="성경책·장절 검색" aria-label="암송 말씀 검색" oninput="memorySearchChanged()">
+        </div>
+        <div class="memory-progress" id="memoryToday"></div>
+        <div class="memory-ref" id="memoryRef">오늘의 암송 말씀</div>
+        <div class="memory-verse" id="memoryText" aria-live="polite">말씀을 준비 중이야.</div>
+        <div class="memory-note" id="memoryNote"></div>
+        <a id="memoryOfficialLink" class="btn official-link full" href="https://bible.bskorea.or.kr/bible_reader" target="_blank" rel="noopener noreferrer">📖 개역개정 원문 확인 · 대한성서공회 ↗</a>
+        <div class="memory-buttons">
+          <button class="btn ghost" onclick="memoryHideToggle()" id="memoryHideBtn">말씀 가리기</button>
+          <button class="btn good" onclick="memoryComplete()" id="memoryCompleteBtn">오늘 암송 완료 ✓</button>
+        </div>
+        <div class="memory-buttons">
+          <button class="btn ghost" onclick="memoryPrev()">‹ 이전 말씀</button>
+          <button class="btn secondary" onclick="memoryNext()">다음 말씀 ›</button>
+          <button class="btn secondary" onclick="memoryGoToday()">📅 오늘의 말씀</button>
+          <button class="btn ghost" onclick="memoryReview()" id="memoryReviewBtn">복습할 말씀 0개</button>
+        </div>
+        <div class="memory-status" id="memoryStudyState"></div>
+        <div class="memory-small" id="memoryListCount">선택한 목록 500개</div>
+        <p class="memory-small">개역개정 본문은 저작권을 고려해 포함하지 않았어. 개인이 합법적으로 가진 성경 파일을 아래에서 불러오면 본문 가리기 연습을 할 수 있고, 암송 기록은 이 기기에 저장돼.</p>
+      </div>
       <div class="card bible-hero">
         <div class="label">📖 오늘의 말씀</div>
         <div class="title" id="dailyWordTitle">오늘 붙들 말씀</div>
@@ -2466,11 +2511,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.3');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=2.4');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
+<script src="./memory.js?v=2.4"></script>
 </body>
 </html>
