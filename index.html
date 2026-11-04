@@ -219,7 +219,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.4</div>
+    <div class="version">v2.5</div>
   </header>
 
   <main>
@@ -375,11 +375,11 @@
 
       <div class="card memory-card" id="memoryCard">
         <div class="memory-top">
-          <div class="label">🧠 말씀 암송 500선</div>
+          <div class="label">🧠 개역한글·개역개정 일치 말씀</div>
           <span class="memory-progress" id="memoryProgress">암송 0/500</span>
         </div>
         <div class="title">평생 간직할 말씀 한 구절씩</div>
-        <p class="hint">핵심 100절부터 시작해서 10가지 주제의 500절을 차근차근 익혀봐.</p>
+        <p class="hint">두 역본의 문구가 정확히 같은 구절만 확인하여 제공해. 500개 장절 후보는 검증 중이야.</p>
         <div class="memory-topic">
           <select id="memoryTopicSelect" aria-label="암송 주제 선택" onchange="memoryChooseTopic()"><option>목록 준비 중</option></select>
           <input id="memorySearch" type="search" placeholder="성경책·장절 검색" aria-label="암송 말씀 검색" oninput="memorySearchChanged()">
@@ -401,7 +401,7 @@
         </div>
         <div class="memory-status" id="memoryStudyState"></div>
         <div class="memory-small" id="memoryListCount">선택한 목록 500개</div>
-        <p class="memory-small">개역개정 본문은 저작권을 고려해 포함하지 않았어. 개인이 합법적으로 가진 성경 파일을 아래에서 불러오면 본문 가리기 연습을 할 수 있고, 암송 기록은 이 기기에 저장돼.</p>
+        <p class="memory-small">개역한글의 저작권이 만료된 본문 중 개역개정과 문구가 완전히 동일한 절만 표시해. 암송 기록은 이 기기에 저장돼.</p>
       </div>
       <div class="card bible-hero">
         <div class="label">📖 오늘의 말씀</div>
@@ -2511,12 +2511,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.4');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=2.5');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
-<script src="./memory.js?v=2.4"></script>
+<script src="./memory.js?v=2.5"></script>
 </body>
 </html>
