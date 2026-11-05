@@ -204,6 +204,9 @@
     .memory-topic{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
     .memory-topic select,.memory-topic input{min-width:0}
     .memory-ref{font-size:22px;font-weight:900;color:var(--text);margin:9px 0}
+     .memory-ref-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0}
+     .memory-ref-nav .memory-ref{margin:0;flex:1;min-width:0}
+     .memory-ref-nav .btn{flex-shrink:0;padding:9px 13px;font-size:13px;min-height:43px}
     .memory-verse{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;line-height:1.8;min-height:92px;font-size:16px;word-break:keep-all;overflow-wrap:break-word;white-space:pre-wrap}
     .memory-note{font-size:13px;line-height:1.65;color:#675977;margin:10px 0 12px}
     .memory-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
@@ -219,7 +222,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.7</div>
+    <div class="version">v2.8</div>
   </header>
 
   <main>
@@ -385,7 +388,10 @@
           <input id="memorySearch" type="search" placeholder="성경책·장절 검색" aria-label="암송 말씀 검색" oninput="memorySearchChanged()">
         </div>
         <div class="memory-progress" id="memoryToday"></div>
-        <div class="memory-ref" id="memoryRef">오늘의 암송 말씀</div>
+        <div class="memory-ref-nav">
+           <div class="memory-ref" id="memoryRef">오늘의 암송 말씀</div>
+           <button class="btn secondary" type="button" onclick="memoryNext()" aria-label="다음 암송 말씀">다음 ›</button>
+         </div>
         <div class="memory-verse" id="memoryText" aria-live="polite">말씀을 준비 중이야.</div>
         <div class="memory-note" id="memoryNote"></div>
         <a id="memoryOfficialLink" class="btn official-link full" href="https://bible.bskorea.or.kr/bible_reader" target="_blank" rel="noopener noreferrer">📖 개역개정 원문 확인 · 대한성서공회 ↗</a>
@@ -2511,12 +2517,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.7');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=2.8');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
-<script src="./memory.js?v=2.7"></script>
+<script src="./memory.js?v=2.8"></script>
 </body>
 </html>
