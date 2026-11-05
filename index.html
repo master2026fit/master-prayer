@@ -219,7 +219,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.6</div>
+    <div class="version">v2.7</div>
   </header>
 
   <main>
@@ -376,10 +376,10 @@
       <div class="card memory-card" id="memoryCard">
         <div class="memory-top">
           <div class="label">🧠 개역한글·개역개정 일치 말씀</div>
-          <span class="memory-progress" id="memoryProgress">암송 0/102</span>
+          <span class="memory-progress" id="memoryProgress">암송 0/50</span>
         </div>
-        <div class="title">평생 간직할 말씀 한 구절씩</div>
-        <p class="hint">500개 후보를 전수 대조해 같은 말씀 91절을 찾았어. 기존 별도 검증 11절을 더해 102절을 제공해.</p>
+        <div class="title">평생 간직할 말씀, 뜻으로 묶어 외우기</div>
+        <p class="hint">검증된 말씀 63절을 내용이 이어지는 50개의 암송 문장으로 묶었어. 여러 절이 이어져도 한 개로 외워.</p>
         <div class="memory-topic">
           <select id="memoryTopicSelect" aria-label="암송 주제 선택" onchange="memoryChooseTopic()"><option>목록 준비 중</option></select>
           <input id="memorySearch" type="search" placeholder="성경책·장절 검색" aria-label="암송 말씀 검색" oninput="memorySearchChanged()">
@@ -400,7 +400,7 @@
           <button class="btn ghost" onclick="memoryReview()" id="memoryReviewBtn">복습할 말씀 0개</button>
         </div>
         <div class="memory-status" id="memoryStudyState"></div>
-        <div class="memory-small" id="memoryListCount">선택한 목록 102개</div>
+        <div class="memory-small" id="memoryListCount">선택한 암송 50개</div>
         <p class="memory-small">개역한글의 저작권이 만료된 본문 중 개역개정과 문구가 완전히 동일한 절만 표시해. 암송 기록은 이 기기에 저장돼.</p>
       </div>
       <div class="card bible-hero">
@@ -2511,12 +2511,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.6');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=2.7');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
-<script src="./memory.js?v=2.6"></script>
+<script src="./memory.js?v=2.7"></script>
 </body>
 </html>
