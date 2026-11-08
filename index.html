@@ -218,6 +218,15 @@
     .memory-edit-panel textarea{display:block;width:100%;min-height:128px;padding:12px;border:1px solid #d9d0df;background:#fff;border-radius:10px;font-size:16px;line-height:1.7;color:var(--text);resize:vertical}
     .memory-edit-panel .memory-buttons{margin-bottom:0}
     .memory-edit-notice{font-size:12px;line-height:1.55;margin-top:7px;color:var(--good);font-weight:750;min-height:16px}
+    .memory-prayer-panel{padding:16px;margin:12px 0 16px;background:#eff7f1;border:1px solid #c4dfca;border-radius:16px}
+    .memory-prayer-panel[hidden]{display:none}
+    .memory-prayer-heading{font-size:18px;font-weight:850;color:#365e44;margin-bottom:6px}
+    .memory-prayer-guide{font-size:13px;color:#42664c;line-height:1.7;margin:12px 0}
+    .memory-prayer-text{background:#fff;padding:17px;border-radius:13px;border:1px solid #d4e5d7;font-size:17px;line-height:1.85;word-break:keep-all;margin:10px 0 16px;color:#273e2d}
+    .memory-prayer-panel label{display:block;font-size:14px;font-weight:800;margin-bottom:8px}
+    .memory-prayer-panel textarea{display:block;width:100%;min-height:90px;padding:12px;border:1px solid #cbdccc;background:#fff;border-radius:10px;font-size:16px;line-height:1.65;color:var(--text);resize:vertical}
+    .memory-prayer-status{font-size:13px;color:#42664c;font-weight:750;line-height:1.5;margin-top:8px}
+    .memory-prayer-notice{font-size:13px;color:#386b43;font-weight:750;margin:8px 0;min-height:8px}
     .memory-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
     .memory-buttons .btn{padding:11px 7px;font-size:13px}
     .memory-status{font-size:13px;color:var(--good);font-weight:800;margin-top:11px}
@@ -231,7 +240,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.9</div>
+    <div class="version">v3.0</div>
   </header>
 
   <main>
@@ -416,6 +425,22 @@
           </div>
         </div>
         <div class="memory-edit-notice" id="memoryEditNotice" aria-live="polite"></div>
+        <button class="btn good full" type="button" id="memoryPrayerToggleBtn" onclick="memoryPrayerToggle()" aria-controls="memoryPrayerPanel">🙏 이 말씀으로 기도하기</button>
+        <div class="memory-prayer-panel" id="memoryPrayerPanel" hidden>
+          <div class="memory-prayer-heading">🙏 말씀을 붙잡고 기도하기</div>
+          <div class="memory-small" id="memoryPrayerRef"></div>
+          <div class="memory-prayer-guide">① 말씀을 읽고 기억하기 → ② 기도문을 소리 내어 기도하기 → ③ 내 상황을 담아 기도하기</div>
+          <div class="memory-prayer-text" id="memoryPrayerText"></div>
+          <label for="memoryPrayerPersonal">나만의 기도 (원할 때 한 줄씩)</label>
+          <textarea id="memoryPrayerPersonal" maxlength="2000" rows="3" placeholder="오늘 내 삶에서 이 말씀을 어떻게 실천하고 싶은지 하나님께 기도해 봐."></textarea>
+          <div class="memory-buttons">
+            <button class="btn secondary" type="button" onclick="memoryPrayerSave()">나의 기도 저장</button>
+            <button class="btn good" type="button" id="memoryPrayerDoneBtn" onclick="memoryPrayerComplete()">오늘 기도 완료 ✓</button>
+          </div>
+          <div class="memory-prayer-status" id="memoryPrayerState" aria-live="polite"></div>
+          <div class="memory-prayer-notice" id="memoryPrayerNotice" aria-live="polite"></div>
+          <div class="memory-small">기도문과 완료 기록은 이 기기에만 저장돼. 암송 완료와는 따로 기록돼.</div>
+        </div>
         <a id="memoryOfficialLink" class="btn official-link full" href="https://bible.bskorea.or.kr/bible_reader" target="_blank" rel="noopener noreferrer">📖 개역개정 원문 확인 · 대한성서공회 ↗</a>
         <div class="memory-buttons">
           <button class="btn ghost" onclick="memoryHideToggle()" id="memoryHideBtn">말씀 가리기</button>
@@ -2539,12 +2564,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.9');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=3.0');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
-<script src="./memory.js?v=2.9"></script>
+<script src="./memory.js?v=3.0"></script>
 </body>
 </html>
