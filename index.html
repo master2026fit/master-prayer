@@ -209,6 +209,15 @@
      .memory-ref-nav .btn{flex-shrink:0;padding:9px 13px;font-size:13px;min-height:43px}
     .memory-verse{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;line-height:1.8;min-height:92px;font-size:16px;word-break:keep-all;overflow-wrap:break-word;white-space:pre-wrap}
     .memory-note{font-size:13px;line-height:1.65;color:#675977;margin:10px 0 12px}
+    .memory-translation-status{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:10px;margin:0 0 9px;font-size:12px;line-height:1.5;font-weight:800}
+    .memory-translation-status.changed{background:#fff4df;color:#79571f;border:1px solid #e9d19f}
+    .memory-translation-status.same{background:#e9f5ea;color:#386b43;border:1px solid #c1dfc5}
+    .memory-edit-panel{padding:14px;margin:10px 0 14px;background:#f9f7fb;border:1px solid var(--line);border-radius:14px}
+    .memory-edit-panel[hidden]{display:none}
+    .memory-edit-panel label{display:block;font-size:14px;font-weight:800;margin-bottom:8px}
+    .memory-edit-panel textarea{display:block;width:100%;min-height:128px;padding:12px;border:1px solid #d9d0df;background:#fff;border-radius:10px;font-size:16px;line-height:1.7;color:var(--text);resize:vertical}
+    .memory-edit-panel .memory-buttons{margin-bottom:0}
+    .memory-edit-notice{font-size:12px;line-height:1.55;margin-top:7px;color:var(--good);font-weight:750;min-height:16px}
     .memory-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
     .memory-buttons .btn{padding:11px 7px;font-size:13px}
     .memory-status{font-size:13px;color:var(--good);font-weight:800;margin-top:11px}
@@ -222,7 +231,7 @@
     <div class="eyebrow">나만의 기도 훈련</div>
     <h1>🙏 오늘의 기도</h1>
     <div class="date" id="todayLabel"></div>
-    <div class="version">v2.8</div>
+    <div class="version">v2.9</div>
   </header>
 
   <main>
@@ -378,10 +387,10 @@
 
       <div class="card memory-card" id="memoryCard">
         <div class="memory-top">
-          <div class="label">🧠 개역한글·개역개정 일치 말씀</div>
+          <div class="label">🧠 개역한글 핵심 암송</div>
           <span class="memory-progress" id="memoryProgress">암송 0/50</span>
         </div>
-        <div class="title">평생 간직할 말씀, 뜻으로 묶어 외우기</div>
+        <div class="title">평생 외울 핵심 말씀 72개</div>
         <p class="hint">검증된 말씀 63절을 내용이 이어지는 50개의 암송 문장으로 묶었어. 여러 절이 이어져도 한 개로 외워.</p>
         <div class="memory-topic">
           <select id="memoryTopicSelect" aria-label="암송 주제 선택" onchange="memoryChooseTopic()"><option>목록 준비 중</option></select>
@@ -392,8 +401,21 @@
            <div class="memory-ref" id="memoryRef">오늘의 암송 말씀</div>
            <button class="btn secondary" type="button" onclick="memoryNext()" aria-label="다음 암송 말씀">다음 ›</button>
          </div>
+        <div class="memory-translation-status" id="memoryTranslationStatus" role="status"></div>
         <div class="memory-verse" id="memoryText" aria-live="polite">말씀을 준비 중이야.</div>
         <div class="memory-note" id="memoryNote"></div>
+        <button class="btn secondary full" type="button" id="memoryEditToggleBtn" onclick="memoryEditToggle()">✏️ 암송 문장 수정</button>
+        <div class="memory-edit-panel" id="memoryEditPanel" hidden>
+          <label for="memoryEditInput">내가 외울 암송 문장 직접 수정</label>
+          <textarea id="memoryEditInput" maxlength="4000" placeholder="개역한글 문장을 확인하고 필요한 부분을 수정해 줘."></textarea>
+          <div class="memory-small" style="margin-top:6px">저장한 문장은 이 기기에만 적용돼. 언제든 개역한글 원문으로 복원할 수 있어.</div>
+          <div class="memory-buttons">
+            <button class="btn good" type="button" onclick="memorySaveEdit()">✓ 수정 저장</button>
+            <button class="btn ghost" type="button" onclick="memoryRestoreOriginal()">원문으로 복원</button>
+            <button class="btn ghost" type="button" onclick="memoryEditCancel()">취소</button>
+          </div>
+        </div>
+        <div class="memory-edit-notice" id="memoryEditNotice" aria-live="polite"></div>
         <a id="memoryOfficialLink" class="btn official-link full" href="https://bible.bskorea.or.kr/bible_reader" target="_blank" rel="noopener noreferrer">📖 개역개정 원문 확인 · 대한성서공회 ↗</a>
         <div class="memory-buttons">
           <button class="btn ghost" onclick="memoryHideToggle()" id="memoryHideBtn">말씀 가리기</button>
@@ -407,7 +429,7 @@
         </div>
         <div class="memory-status" id="memoryStudyState"></div>
         <div class="memory-small" id="memoryListCount">선택한 암송 50개</div>
-        <p class="memory-small">개역한글의 저작권이 만료된 본문 중 개역개정과 문구가 완전히 동일한 절만 표시해. 암송 기록은 이 기기에 저장돼.</p>
+        <p class="memory-small">성경전서 개역한글판(1961) © 대한성서공회. 개역개정과의 문구 차이를 확인하고, 필요하면 내 암송 문장을 따로 저장할 수 있어.</p>
       </div>
       <div class="card bible-hero">
         <div class="label">📖 오늘의 말씀</div>
@@ -2517,12 +2539,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=2.8');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=2.9');
       await reg.update();
     }catch(e){}
   });
 }
 </script>
-<script src="./memory.js?v=2.8"></script>
+<script src="./memory.js?v=2.9"></script>
 </body>
 </html>
