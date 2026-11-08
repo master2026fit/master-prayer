@@ -12,7 +12,43 @@ if(verses.length!==72 || new Set(verses.map(x=>x.key)).size!==72 || sourceVerseC
 const bookCodes = {"6":"JOS","19":"PSA","20":"PRO","23":"ISA","24":"JER","33":"MIC","40":"MAT","41":"MRK","42":"LUK","43":"JHN","44":"ACT","45":"ROM","46":"1CO","47":"2CO","48":"GAL","49":"EPH","50":"PHP","51":"COL","52":"1TH","55":"2TI","58":"HEB","59":"JAS","60":"1PE","62":"1JN","66":"REV"};
 const stateKey = 'prayerMemory500ProgressV1';
 const editsKey = 'prayerMemoryUserEditsV1';
-let selected = verses[0],hidden=false,editing=false,topic='all';
+const prayerNotesKey = 'prayerVersePersonalPrayersV1';
+const prayerDoneKey = 'prayerVersePrayerDoneV1';
+const versePrayers = ["제 생각만 믿고 앞서가지 않게 하시고, 오늘의 선택에서 주님을 인정하며 인도하심을 따르게 해주세요.","눈에 보이지 않아도 약속을 신뢰하는 믿음을 주시고, 불확실한 순간에도 주님을 바라보게 해주세요.","제 마음의 소원을 주님께 맡기고, 주님의 기쁨을 제 기쁨으로 삼게 해주세요.","어려움 앞에서 혼자 버티려 하지 않고 피난처이신 하나님께 먼저 나아가게 해주세요.","흔들리는 제 마음을 주님께 고정하고, 염려 속에서도 주시는 평안을 누리게 해주세요.","지금 이해할 수 없는 일 가운데서도 선을 이루시는 주님을 신뢰하게 해주세요.","저를 사랑하시고 구원하신 은혜를 잊지 않게 하시고, 다른 사람에게도 그 사랑을 전하게 해주세요.","구원을 제 공로로 여기지 않게 하시고, 감사하는 마음으로 선한 일을 실천하게 해주세요.","제 죄와 부족함을 정직하게 인정하며, 값없이 주신 은혜만 의지하게 해주세요.","죄의 무게를 가볍게 여기지 않고, 예수님 안에서 주신 영생을 기억하며 살게 해주세요.","갈림길에서 주님의 말씀을 기준으로 삼고, 진리이신 예수님의 길을 따르게 해주세요.","제 마음의 구원이 예수님께 있음을 믿고, 다른 것에 기대어 살려는 마음을 내려놓게 해주세요.","상황이 어렵더라도 기뻐할 이유를 주 안에서 찾고, 하루의 순간마다 주님께 기도로 마음을 열게 해주세요.","염려를 혼자 쌓아 두지 말고 감사함으로 아뢰게 하시며, 제 마음을 평강으로 지켜주세요.","하나님의 이름을 높이고 아버지의 뜻을 먼저 구하며, 일용할 것을 감사히 받고 다른 사람을 용서하게 해주세요.","답이 보이지 않을 때에도 주님께 부르짖고, 제 생각보다 크신 뜻을 기다리게 해주세요.","기도를 쉽게 포기하지 않고 구하고 찾고 두드리며, 선하신 주님의 때를 믿게 해주세요.","제 뜻만 고집하지 않고 주님의 뜻에 귀를 기울이며 담대히 기도하게 해주세요.","오래 참고 친절하게 사랑하게 하시고, 자랑과 시기 대신 상대를 세워 주는 사람이 되게 해주세요.","예수님이 저를 사랑하신 것처럼 오늘 만나는 사람을 진심으로 사랑하게 해주세요.","먼저 저를 사랑하신 은혜를 기억하여 계산하지 않고 사랑하게 해주세요.","거짓 없는 사랑으로 형제를 존중하고, 누군가의 좋은 일을 먼저 기뻐하게 해주세요.","제게 잘못한 사람을 용서할 힘을 주시고, 주께 받은 긍휼을 다른 사람에게 베풀게 해주세요.","마음을 다해 하나님을 사랑하고, 제 곁의 이웃을 제 몸처럼 돌보게 해주세요.","형편에 따라 감사가 흔들리지 않게 하시고, 모든 일에서 주님께 감사할 제목을 찾게 해주세요.","오늘도 베푸신 선하심을 기억하고, 불평보다 감사와 찬양으로 주께 나아가게 해주세요.","평범한 하루에도 주 안에서 기쁨을 발견하고, 그 기쁨을 주위에 나누게 해주세요.","이미 받은 은혜를 잊지 않게 하시고, 제 영혼이 하나님을 진심으로 찬양하게 해주세요.","오늘이라는 날을 선물로 받아 기뻐하며, 주어진 시간을 소중히 사용하게 해주세요.","제가 누리는 모든 좋은 것이 주께로부터 왔음을 기억하고, 교만보다 감사를 선택하게 해주세요.","목자이신 주님을 믿고, 부족해 보이는 순간에도 저를 돌보심을 신뢰하게 해주세요.","어두운 길을 지날 때에도 동행하시는 하나님을 기억하며 두려움에 지지 않게 해주세요.","겁이 날 때 주님의 손이 저를 붙드심을 믿고, 오늘 해야 할 일을 담대히 하게 해주세요.","세상이 주지 못하는 평안을 제 마음에 주시고, 불안 속에서도 주님의 음성을 듣게 해주세요.","당장 필요한 것만 붙들지 않고 하나님의 나라와 의를 먼저 구하며 오늘의 염려를 내려놓게 해주세요.","제 마음의 무거운 걱정을 주께 맡기고, 저를 돌보시는 사랑을 믿게 해주세요.","주의 말씀이 제 선택을 비추는 등불이 되게 하시고, 말씀대로 한 걸음씩 살게 해주세요.","말씀을 가까이하며 낮과 밤에 마음에 새기고, 두려운 상황에서도 담대히 순종하게 해주세요.","성경을 아는 데서 멈추지 않고 배우고 바로잡고 선한 일에 준비된 사람이 되게 해주세요.","제 계획을 겸손히 주께 올려 드리고, 제 걸음을 인도하시는 하나님을 인정하게 해주세요.","지혜가 부족할 때 사람의 눈치만 보지 않고 하나님께 구하며 귀 기울이게 해주세요.","제 마음에서 나오는 말과 행동을 살피고, 해로운 생각보다 생명을 살리는 마음을 지키게 해주세요.","고난을 피하는 것만 구하지 않고 인내와 소망을 배우며 주님의 사랑을 굳게 붙들게 해주세요.","어떤 형편도 저를 향한 주님의 사랑에서 끊을 수 없음을 믿고 오늘의 어려움을 견디게 해주세요.","낙심할 때 겉으로 보이는 형편만 바라보지 않고 영원한 약속에 마음을 두게 해주세요.","지친 몸과 마음에 새 힘을 주시고, 서두르거나 포기하지 않고 주님을 기다리게 해주세요.","상한 마음을 숨기지 않고 주님께 내어 놓게 하시며, 가까이 오시는 위로를 느끼게 해주세요.","눈물과 아픔이 끝날 날을 소망하며, 오늘 슬퍼하는 사람을 위로하게 해주세요.","제 삶에 사랑과 기쁨과 평안이 자라게 하시고, 오래 참음과 온유와 절제로 말하고 행동하게 해주세요.","정의를 행하고 인애를 사랑하며 하나님 앞에서 겸손히 걷는 사람이 되게 해주세요.","사람에게 보이기 위해 일하지 않고, 맡은 일을 주께 하듯 정직하고 성실하게 하게 해주세요.","제 말과 행동이 작은 빛이 되어 사람들이 저를 칭찬하기보다 하나님께 영광을 돌리게 해주세요.","세상의 기준에 무심코 끌려가지 않고, 마음을 새롭게 하여 주님의 뜻을 분별하게 해주세요.","말씀을 듣고 끝내지 않고 오늘 한 가지라도 구체적으로 실천하게 해주세요.","제가 있는 자리에서 예수님의 사랑을 전하며, 가르쳐 주신 말씀을 먼저 순종하게 해주세요.","섬김받으려는 마음을 내려놓고, 예수님처럼 기꺼이 다른 사람을 섬기게 해주세요.","저를 앞세우지 않고 날마다 십자가를 지며 주님을 따라가는 용기를 주세요.","주님을 떠나 제 힘만으로 열매 맺으려 하지 않게 하시고, 늘 주님 안에 머물게 해주세요.","근심이 밀려올 때 하나님과 예수님을 믿으라는 말씀을 기억하게 해주세요.","제 힘을 자랑하기보다 능력 주시는 하나님을 의지하여 맡겨진 일을 감당하게 해주세요.","부모를 존중하고 감사하게 하시며, 가족에게 사랑을 말과 행동으로 나타내게 해주세요.","아이에게 좋은 길을 말로만 가르치지 않고, 제가 먼저 본이 되게 해주세요.","서로의 허물을 용납하고 용서하며, 가족과 이웃 사이에 사랑을 더하게 해주세요.","제가 할 수 있는 만큼 먼저 화해를 구하고, 말다툼보다 평화를 선택하게 해주세요.","어려운 이웃의 짐을 외면하지 않고, 작더라도 실제로 도움을 주는 사람이 되게 해주세요.","돌봄이 필요한 사람을 잊지 않게 하시고, 말뿐 아니라 깨끗하고 진실한 사랑으로 섬기게 해주세요.","성령의 권능을 의지하여 두려움보다 믿음을 선택하고, 제가 있는 곳에서 예수님의 증인으로 살게 해주세요.","과거의 죄책감에 매이지 않고 예수님 안의 자유를 기억하며 새롭게 살아가게 해주세요.","옛 습관에 돌아가지 않고 주님 안에서 새 사람이 되었음을 오늘의 선택으로 드러내게 해주세요.","예수님의 부활로 주신 산 소망을 붙들고, 지금의 어려움 너머를 바라보게 해주세요.","죽음보다 크신 생명의 주님을 신뢰하고, 절망한 사람에게 부활의 소망을 나누게 해주세요.","제 마음의 문을 주님께 열고, 주님의 음성에 귀 기울이며 친밀히 동행하게 해주세요."];
+function readPrayerData(key){
+  try{
+    const value=JSON.parse(localStorage.getItem(key)||'{}');
+    return value&&typeof value==='object'&&!Array.isArray(value)?value:{};
+  }catch(e){return {}}
+}
+function prayerText(x){
+  const i=verses.findIndex(v=>v.key===x.key);
+  return '하나님, '+(versePrayers[i]||'오늘 외운 말씀을 마음에 새기고 제 삶에서 실천하게 해주세요.')+' 아멘.';
+}
+function prayerNotice(message){document.getElementById('memoryPrayerNotice').textContent=message}
+function renderPrayer(){
+  const p=document.getElementById('memoryPrayerPanel');
+  p.hidden=!praying;
+  document.getElementById('memoryPrayerToggleBtn').textContent=praying?'🙏 기도창 닫기':'🙏 이 말씀으로 기도하기';
+  if(!praying)return;
+  document.getElementById('memoryPrayerRef').textContent=ref(selected)+' · '+selected.title;
+  document.getElementById('memoryPrayerText').textContent=prayerText(selected);
+  const completed=readPrayerData(prayerDoneKey)[selected.key]===today();
+  document.getElementById('memoryPrayerDoneBtn').disabled=completed;
+  document.getElementById('memoryPrayerState').textContent=completed?'✓ 오늘 이 말씀으로 기도했어. 내일도 다시 기도할 수 있어.':'말씀을 생각하며 기도한 뒤 ‘기도 완료’를 눌러 줘.';
+}
+function savePersonalPrayer(announce){
+  const input=document.getElementById('memoryPrayerPersonal');
+  const value=input.value.trim();
+  if(value.length>2000){prayerNotice('기도문은 2,000자 이내로 적어 줘.');return false}
+  const notes=readPrayerData(prayerNotesKey);
+  if(value)notes[selected.key]=value;else delete notes[selected.key];
+  try{localStorage.setItem(prayerNotesKey,JSON.stringify(notes))}
+  catch(e){prayerNotice('저장하지 못했어. 브라우저 저장 공간을 확인해 줘.');return false}
+  if(announce)prayerNotice('✓ 내 기도를 이 기기에 저장했어.');
+  return true;
+}
+let selected = verses[0],hidden=false,editing=false,praying=false,topic='all';
 
 function readState(){
   try{
@@ -44,7 +80,7 @@ function candidates(){
 }
 function stageName(n){return n>=5?'충분히 복습했어':n>0?n+'단계 복습 중':'아직 암송 전'}
 function dueItems(data){return verses.filter(x=>data[x.key]&&data[x.key].stage>0&&data[x.key].due<=today()).sort((a,b)=>data[a.key].due.localeCompare(data[b.key].due))}
-function setCurrent(x){selected=x;hidden=false;editing=false;render()}
+function setCurrent(x){selected=x;hidden=false;editing=false;praying=false;render()}
 function currentIndex(){return verses.findIndex(x=>x.key===selected.key)}
 function dailyVerse(){
   const d=new Date(),offset=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2026,10,5))/86400000);
@@ -77,6 +113,7 @@ function render(){
   const panel=document.getElementById('memoryEditPanel');
   panel.hidden=!editing;
   document.getElementById('memoryEditToggleBtn').textContent=editing?'수정창 닫기':'✏️ 암송 문장 수정';
+  renderPrayer();
 }
 function notice(msg){const el=document.getElementById('memoryEditNotice');if(el)el.textContent=msg}
 function navigate(delta){
@@ -119,6 +156,20 @@ window.memoryRestoreOriginal=()=>{
   editing=false;render();notice('✓ 개역한글 원문으로 복원했어.')
 };
 window.memoryEditCancel=()=>{editing=false;render();notice('수정을 취소했어.')};
+window.memoryPrayerToggle=()=>{
+  praying=!praying;editing=false;hidden=false;render();prayerNotice('');
+  if(praying){
+    document.getElementById('memoryPrayerPersonal').value=readPrayerData(prayerNotesKey)[selected.key]||'';
+  }
+};
+window.memoryPrayerSave=()=>savePersonalPrayer(true);
+window.memoryPrayerComplete=()=>{
+  if(!savePersonalPrayer(false))return;
+  const done=readPrayerData(prayerDoneKey);done[selected.key]=today();
+  try{localStorage.setItem(prayerDoneKey,JSON.stringify(done))}
+  catch(e){prayerNotice('기도 완료 기록을 저장하지 못했어.');return}
+  renderPrayer();prayerNotice('🙏 오늘의 말씀 기도를 마쳤어. 기도 내용도 함께 저장했어.');
+};
 const select=document.getElementById('memoryTopicSelect');
 if(!select)return;
 select.innerHTML='<option value="all">핵심 암송 · '+verses.length+'개</option>'+groups.map((g,i)=>'<option value="'+i+'">'+g.name+' · '+g.entries.length+'개</option>').join('');
