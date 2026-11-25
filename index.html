@@ -276,7 +276,7 @@
         <button class="btn ghost full" style="margin-top:8px" onclick="openTodayBibleFromHome()">오늘 말씀 성경에서 보기</button>
       </div>
 
-      <div class="card"><button class="btn primary full" onclick="location.href='./ollam.html'">📖 153올람편지</button></div><div class="section-title">지금 기도하기</div>
+      <div class="card"><button class="btn primary full" onclick="location.href='./ollam.html'">📖 153올람 · 가정예배문</button></div><div class="section-title">지금 기도하기</div>
       <div class="card">
         <div class="hint">시간을 정하고 잠시 멈춰 하나님께 마음을 말씀드려봐.</div>
         <div class="row" style="margin-top:12px">
@@ -290,7 +290,7 @@
       <div class="grid" id="homeCategories"></div>
     </section>
 
-    <section id="olamLetters" class="view"><div class="card"><div class="title">153올람편지</div><p class="hint">구미교회 원본 사진 확인분 61~80 · 제목과 성경 범위, 핵심 요약 (원문 전문 아님)</p><input id="olamSearch" type="search" placeholder="번호, 제목, 성경 검색" style="width:100%;padding:12px" oninput="renderOlamLetters()"><div id="olamList"></div><button class="btn ghost full" onclick="showView('home',document.querySelector('nav button[data-view=home]'))">홈으로</button></div></section>
+    <section id="olamLetters" class="view"><div class="card"><div class="title">153올람편지</div><button class="btn primary full" onclick="location.href='./ollam.html'">153편 가정예배문 · 나눔 질문·해설 열기</button><p class="hint">구미교회 원본 사진 확인분 61~80 · 제목과 성경 범위, 핵심 요약 (원문 전문 아님)</p><input id="olamSearch" type="search" placeholder="번호, 제목, 성경 검색" style="width:100%;padding:12px" oninput="renderOlamLetters()"><div id="olamList"></div><button class="btn ghost full" onclick="showView('home',document.querySelector('nav button[data-view=home]'))">홈으로</button></div></section>
 <section id="situations" class="view">
       <div class="section-title">상황별 기도 <span class="small">30개 상황 · 90개 기도문</span></div>
       <div class="card situation-tools">
@@ -2565,7 +2565,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)se
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=3.0');
+      const reg=await navigator.serviceWorker.register('./sw.js?v=ollam-family-2');
       await reg.update();
     }catch(e){}
   });
