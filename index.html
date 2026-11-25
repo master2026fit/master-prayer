@@ -276,7 +276,7 @@
         <button class="btn ghost full" style="margin-top:8px" onclick="openTodayBibleFromHome()">오늘 말씀 성경에서 보기</button>
       </div>
 
-      <div class="section-title">지금 기도하기</div>
+      <div class="card"><button class="btn primary full" onclick="showView('olamLetters');renderOlamLetters()">📖 153올람편지</button></div><div class="section-title">지금 기도하기</div>
       <div class="card">
         <div class="hint">시간을 정하고 잠시 멈춰 하나님께 마음을 말씀드려봐.</div>
         <div class="row" style="margin-top:12px">
@@ -290,7 +290,8 @@
       <div class="grid" id="homeCategories"></div>
     </section>
 
-    <section id="situations" class="view">
+    <section id="olamLetters" class="view"><div class="card"><div class="title">153올람편지</div><p class="hint">구미교회 원본 사진 확인분 61~80 · 제목과 성경 범위, 핵심 요약 (원문 전문 아님)</p><input id="olamSearch" type="search" placeholder="번호, 제목, 성경 검색" style="width:100%;padding:12px" oninput="renderOlamLetters()"><div id="olamList"></div><button class="btn ghost full" onclick="showView('home',document.querySelector('nav button[data-view=home]'))">홈으로</button></div></section>
+<section id="situations" class="view">
       <div class="section-title">상황별 기도 <span class="small">30개 상황 · 90개 기도문</span></div>
       <div class="card situation-tools">
         <div class="situation-search">
@@ -2571,5 +2572,6 @@ if('serviceWorker' in navigator){
 }
 </script>
 <script src="./memory.js?v=3.0"></script>
+<script>const olamLetters=[[61,"성전의 기초가 놓임을 보았더라","에스라 3:8~13","교회 공동체를 소중히 여기고 함께 믿음을 세우기"],[62,"율법대로 행할 것이라","에스라 10:1~4","회개하며 신앙의 순수함을 회복하기"],[63,"종의 기도를 들으시옵소서","느헤미야 1:4~11","공동체의 어려움을 놓고 기도하며 헌신하기"],[64,"안식일을 거룩하게 하라","느헤미야 13:15~22","예배와 하나님의 말씀을 우선하기"],[65,"죽으면 죽으리이다","에스더 4:13~17","하나님의 섭리를 믿고 용기 있게 헌신하기"],[66,"하나님을 원망하지 아니하니라","욥기 1:13~22","고난 중에도 하나님을 신뢰하고 찬양하기"],[67,"주여 내게 알게 하옵소서","욥기 42:1~10","이해하기 어려운 고난 속에서 겸손히 은혜 구하기"],[68,"모든 일이 다 형통하리로다","시편 1:1~6","말씀을 즐거워하며 참된 복을 구하기"],[69,"여호와여 어느 때까지니이까","시편 13:1~6","고통을 솔직히 아뢰고 소망 가운데 기도하기"],[70,"여호와는 나의 목자시니","시편 23:1~6","하나님의 인도와 보호를 신뢰하기"],[71,"여전히 찬송하리로다","시편 42:1~11","낙심 중에도 하나님을 갈망하고 찬송하기"],[72,"나의 눈물을 주의 병에 담으소서","시편 56:1~13","두려움 속에서 하나님을 의지하기"],[73,"주의 집에 사는 자들은 복이 있나니","시편 84:1~12","예배와 공동체를 사모하며 사랑하는 사람을 초청하기"],[74,"지혜로운 마음을 얻게 하소서","시편 90:1~12","유한한 인생을 기억하고 오늘을 지혜롭게 살기"],[75,"복되고 형통하리로다","시편 128:1~6","가정이 함께 하나님을 경외하고 예배하기"],[76,"범사에 그를 인정하라","잠언 3:1~10","모든 일에서 하나님을 인정하고 인도하심을 구하기"],[77,"개미를 보고 배우라","잠언 6:6~19","자신과 이웃과 하나님 앞에서 성실하게 살기"],[78,"온순한 혀는 생명나무니라","잠언 15:1~7","부드럽고 지혜로운 말로 사람을 살리기"],[79,"너의 행사를 여호와께 맡기라","잠언 16:1~9","교만을 버리고 계획과 걸음을 하나님께 맡기기"],[80,"헛되고 헛되니 모든 것이 헛되도다","전도서 1:1~11","세상 성취를 넘어 하나님을 경외하며 의미 있게 살기"]];function renderOlamLetters(){const q=document.getElementById('olamSearch').value.trim().replace(/\s/g,'');const root=document.getElementById('olamList');root.replaceChildren();for(const [n,t,b,s] of olamLetters){if(![n,t,b,s].join(' ').replace(/\s/g,'').includes(q))continue;const d=document.createElement('details');d.style.cssText='padding:12px 0;border-bottom:1px solid #ddd';const h=document.createElement('summary');h.textContent=n+'. '+t+' · '+b;d.append(h);const p=document.createElement('p');p.textContent='핵심 요약: '+s;d.append(p);root.append(d)}if(!root.children.length)root.textContent='확인된 자료 중 검색 결과가 없습니다.'}</script>
 </body>
 </html>
